@@ -6,7 +6,7 @@ import re
 
 from apps.movies_tickets.models import City
 from apps.movies_tickets.spiders.meituan import MeituanMovie
-#from apps.movies_tickets.spiders.nuomi import NuomiMovie
+from apps.movies_tickets.spiders.nuomi import NuomiMovie
 from apps.movies_tickets.spiders.taobao import TaobaoMovie
 
 
@@ -21,7 +21,7 @@ class MovieList(object):
         self.taobao_city_id = self.city.taobao_city_id 
         
         self.meituan_url = ('http://%s.meituan.com/dianying/zuixindianying' % self.meituan_city_id)
-        self.nuomi_url = ('http://m.dianying.baidu.com/info/movie/hot?c=%s' % self.nuomi_city_id)
+        self.nuomi_url = ('http://%s.nuomi.com/pcindex/main/filmlist?type=1' % self.nuomi_city_id)
         self.taobao_url = ('https://dianying.taobao.com/showList.htm?city=%s' % self.taobao_city_id)
 
         self.result = [[]]
@@ -65,7 +65,7 @@ class DistrictList(object):
 
         self.meituan_url = ('http://%s.meituan.com/dianying/%s?mtt=1.movie'
                             % (self.meituan_city_id, self.meituan_movie_id))
-        self.nuomi_url = ('http://m.dianying.baidu.com/info/movie/schedule?movie_id=%s&c=%s'%(self.nuomi_movie_id, self.nuomi_city_id))
+        self.nuomi_url = ('http://%s.nuomi.com/film/%s'%(self.nuomi_city_id, self.nuomi_movie_id))
         self.taobao_url = ('https://dianying.taobao.com/showDetailSchedule.htm?showId=%s&city=%s'
                            %(self.taobao_movie_id, self.taobao_city_id))
 
@@ -113,9 +113,10 @@ class CinemaList(object):
 
         self.meituan_url = ('http://%s.meituan.com/dianying/%s/%s/all?mtt=1.movie'
                             %(self.meituan_city_id, self.meituan_movie_id, self.meituan_district_id))
-        self.nuomi_url = ''
+        self.nuomi_url = ('http://%s.nuomi.com/film/%s/%s/sub0d0/cb0-d10000-s0-o-b1-f0-p1#cinema-nav'
+                            %(self.nuomi_city_id, self.nuomi_movie_id, self.nuomi_district_id))
         self.taobao_url = ('https://dianying.taobao.com/showDetailSchedule.htm?showId=%s&regionName=%s&city=%s'
-                           %(self.taobao_movie_id, unicode(self.taobao_district_id), self.taobao_city_id))
+                            %(self.taobao_movie_id, unicode(self.taobao_district_id), self.taobao_city_id))
 
         self.result = [[]]
         self.name_list = ['']
@@ -254,21 +255,23 @@ class CityList(object):
                 )
 
     def get_nuomi(self):
-        url = 'http://m.dianying.baidu.com/city/choose'
+        url = 'http://www.nuomi.com/pcindex/main/changecity'
         try:
             r = requests.get(url)
         except:
             self.result.append('nuomi_error')
             return 0
+        r.encoding = 'utf-8'
         soup = BeautifulSoup(r.text)
-        div = soup.find_all('div', class_='section city-list')
-        for i in div:
+        li = soup.find_all('li', class_='city-list clearfix')
+        for i in li:
             a = i.find_all('a')
             for j in a:
-                name = j.get_text()
-                nuomi_city_id = j['data-citycode']
-                span = i.find_all('span')
-                first_char = span[0].get_text()
+                name_text = j.get_text()
+                name = re.search(r'\S+', name_text).group()
+                href = j['href']
+                nuomi_city_id = re.search(r'(?<=http://)\w+', href).group()
+                first_char = i.find('span', class_='arrow').get_text()
 
                 city = City.objects.filter(city_name=name)
                 if city.exists():
@@ -277,8 +280,17 @@ class CityList(object):
                     City.objects.create(
                         city_name=name,
                         first_char=first_char,
-                        nuomi_city_id=nuomi_city_id,
+                        nuomi_city_id=nuomi_city_id,    
                     )
+
+
+
+
+
+
+
+
+
 
 
 

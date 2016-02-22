@@ -52,18 +52,19 @@ class TaobaoMovie(object):
         #li[1].decompose()
         a = li[0].find_all('a')
         for i in a:
-            taobao_district_href = i['data-param']
+            #taobao_district_href = i['data-param']
             distric_name = i.get_text()
+            taobao_district_id = distric_name
 
             if distric_name not in name_list:
                 name_list.append(distric_name)
                 result.append({
                     'distric_name': distric_name,
-                    'taobao_district_href': taobao_district_href,
+                    'taobao_district_id': taobao_district_id,
                 })
             else:
                 index = name_list.index(distric_name)
-                result[index]['taobao_district_href'] = unicode(taobao_district_href)
+                result[index]['taobao_district_id'] = unicode(taobao_district_id)
 
     def get_cinema_list(self,url,name_list,result):
         try:
@@ -77,16 +78,17 @@ class TaobaoMovie(object):
         for i in a:
             cinema_name = i.get_text()
             taobao_cinema_href = i['data-param']
+            taobao_cinema_id = re.search(r'(?<=cinemaId=)\d+', taobao_cinema_href).group()
 
             if cinema_name not in name_list:
                 name_list.append(cinema_name)
                 result.append({
                     'cinema_name': cinema_name,
-                    'taobao_cinema_href': taobao_cinema_href,
+                    'taobao_cinema_id': taobao_cinema_id,
                 })
             else:
                 index = name_list.index(cinema_name)
-                result[index]['taobao_cinema_href'] = taobao_cinema_href    
+                result[index]['taobao_cinema_id'] = taobao_cinema_id    
 
     def get_price_list(self,url,start_time_list,result):
         try:

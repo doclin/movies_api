@@ -51,16 +51,17 @@ class MeituanMovie(object):
         for i in a:
             distric_name = i.get_text()
             meituan_district_href = i['href']
+            meituan_district_id = re.search(r'[a-z]+(?=/all)', meituan_district_href).group()
 
             if distric_name not in name_list:
                 name_list.append(distric_name)
                 result.append({
                     'distric_name': distric_name,
-                    'meituan_district_href': meituan_district_href,
+                    'meituan_district_id': meituan_district_id,
                 })      
             else:
                 index = name_list.index(distric_name)
-                result[index]['meituan_district_href'] = meituan_district_href
+                result[index]['meituan_district_id'] = meituan_district_id
 
     def get_cinema_list(self,url,name_list,result):
         try:
@@ -70,21 +71,25 @@ class MeituanMovie(object):
         soup = BeautifulSoup(r.text)
         div = soup.find_all('div', id='J-brand-filter')
         li = div[0].find_all('li')
-        for i in li:
+        for i in li[1:]:
             a = i.find_all('a')
             meituan_cinema_href = a[0]['href']
+            meituan_cinema_id = re.search(r'(?<=/all/)\d+', meituan_cinema_href).group()
             cinema_name = a[0].get_text()
 
             if cinema_name not in name_list: 
                 name_list.append(cinema_name)
                 result.append({
                     'cinema_name':cinema_name,
-                    'meituan_cinema_href':meituan_cinema_href,
+                    'meituan_cinema_id':meituan_cinema_id,
                 })      
             else:
                 index = name_list.index(cinema_name)
-                result[index]['meituan_cinema_href'] = meituan_cinema_href
+                result[index]['meituan_cinema_id'] = meituan_cinema_id
 
     def get_price_list(self,url,name_list,result):
         pass
         
+
+#http://m.maoyan.com/changecity.json
+#http://%s.meituan.com/dianying/zuixindianying
