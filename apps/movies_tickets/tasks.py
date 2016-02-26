@@ -111,7 +111,7 @@ class CinemaList(object):
         self.taobao_movie_id = kwargs['taobao_movie_id']
         self.taobao_district_id = kwargs['taobao_district_id']
 
-        self.meituan_url = ('http://%s.meituan.com/dianying/%s/%s/all?mtt=1.movie'
+        self.meituan_url = ('http://%s.meituan.com/dianying/%s//%s/all?mtt=1.movie'
                             %(self.meituan_city_id, self.meituan_movie_id, self.meituan_district_id))
         self.nuomi_url = ('http://%s.nuomi.com/film/%s/%s/sub0d0/cb0-d10000-s0-o-b1-f0-p1#cinema-nav'
                             %(self.nuomi_city_id, self.nuomi_movie_id, self.nuomi_district_id))
@@ -160,13 +160,15 @@ class PriceList(object):
         self.taobao_movie_id = kwargs['taobao_movie_id']
         self.taobao_cinema_id = kwargs['taobao_cinema_id']
 
-        self.meituan_url = ''
-        self.nuomi_url = ''
+        self.meituan_url = ('http://%s.meituan.com/shop/%s?movieid=%s'
+                            %(self.meituan_city_id, self.meituan_cinema_id, self.meituan_movie_id))
+        self.nuomi_url = ('http://%s.nuomi.com/pcindex/main/timetable?cinemaid=%s&mid=%s'
+                            %(self.nuomi_city_id, self.nuomi_cinema_id, self.nuomi_movie_id))
         self.taobao_url = ('https://dianying.taobao.com/showDetailSchedule.htm?showId=%s&city=%s&cinemaId=%s'
-                           %(self.taobao_movie_id, self.taobao_city_id ,self.taobao_cinema_id))
+                            %(self.taobao_movie_id, self.taobao_city_id ,self.taobao_cinema_id))
 
         self.result = [[]]
-        self.start_time_list = []
+        self.start_time_list = ['']
 
     def get_price_list(self):
         if self.meituan_cinema_id:
@@ -271,7 +273,7 @@ class CityList(object):
                 name = re.search(r'\S+', name_text).group()
                 href = j['href']
                 nuomi_city_id = re.search(r'(?<=http://)\w+', href).group()
-                first_char = i.find('span', class_='arrow').get_text()
+                first_char = i.find('span', class_='letter fl').get_text()
 
                 city = City.objects.filter(city_name=name)
                 if city.exists():

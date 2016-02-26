@@ -4,6 +4,9 @@ from bs4 import BeautifulSoup
 import requests
 import re
 
+from PIL import Image,ImageStat
+from StringIO import StringIO
+
 
 class MeituanMovie(object):
     """
@@ -69,13 +72,14 @@ class MeituanMovie(object):
         except:
             return self.connection_error_message
         soup = BeautifulSoup(r.text)
-        div = soup.find_all('div', id='J-brand-filter')
-        li = div[0].find_all('li')
-        for i in li[1:]:
-            a = i.find_all('a')
-            meituan_cinema_href = a[0]['href']
-            meituan_cinema_id = re.search(r'(?<=/all/)\d+', meituan_cinema_href).group()
-            cinema_name = a[0].get_text()
+        div = soup.find_all('div', class_='J-cinema-item cinema-item cf')
+        print div
+        for i in div:
+            h4 = i.find('h4')
+            a = h4.find('a')
+            meituan_cinema_href = a['href']
+            meituan_cinema_id = re.search(r'(?<=/shop/)\d+', meituan_cinema_href).group()
+            cinema_name = a.get_text()
 
             if cinema_name not in name_list: 
                 name_list.append(cinema_name)
@@ -87,9 +91,84 @@ class MeituanMovie(object):
                 index = name_list.index(cinema_name)
                 result[index]['meituan_cinema_id'] = meituan_cinema_id
 
-    def get_price_list(self,url,name_list,result):
-        pass
+    def get_price_list(self,url,start_time_list,result):
+        try:
+            r = requests.get(url)
+        except:
+            return self.connection_error_message
+
+        sum_list = [6647, 3631, 6680, 6137, 5955, 6603, 7381, 4637, 7431, 7304, 575]
+
+        soup = BeautifulSoup(r.text)
+        table = soup.find('table',class_='time-table time-table--current')
+        tr = table.find_all('tr')
+        for i in tr[1:]:
+            td = i.find_all('td')
+            time = td[0]
+            span = time.find_all('span')
+            start_time = span[0].get_text()
+            end_time = span[1].get_text()
+            price_td = td[3]
+            div = price_td.find_all('div')
+            try:
+                i_tag = div[1].find_all('i')
+                i_tag = i_tag[:-1]
+            except:
+                i_tag = div[0].find_all('i')
+            meituan_now_price = ''
+
+            fixed_add = i_tag[0]['style']
+            fixed_add = re.search(r'//s0\.mei.*(?=\);)', fixed_add).group()
+            fixed_url = 'http:' + fixed_add
+            img_request = requests.get(fixed_url)
+            img = Image.open(StringIO(img_request.content))
+
+            for j in i_tag:
+                style = j['style']
+                img_add = re.search(r'//s0\.mei.*(?=\);)', style).group()
+                position = re.search(r'(?<=position:).*', style).group()
+                position = re.findall(r'\d+', position)
+                x_position = int(position[0])
+                y_position = int(position[1])
+                box = (x_position, y_position, x_position+7, y_position+13)
+
+                if img_add != fixed_add:
+                    img_url = 'http:' + img_add
+                    j_request = requests.get(img_url)
+                    j_img = Image.open(StringIO(j_request.content))
+                    img_result = j_img.crop(box)
+                    result_sta = ImageStat.Stat(img_result)
+                else:
+                    img_result = img.crop(box)
+                    result_sta = ImageStat.Stat(img_result)
+
+                img_sum = int((result_sta.sum)[3])
+                try:
+                    num = sum_list.index(img_sum)
+                    num_str = str(num)
+                    meituan_now_price = meituan_now_price + num_str
+                except:
+                    num_str = '.'
+                    meituan_now_price = meituan_now_price + num_str
+
+            if start_time not in start_time_list:
+                start_time_list.append(start_time)
+                result.append({
+                    'start_time': start_time,
+                    'end_time': end_time,
+                    'meituan_now_price': meituan_now_price,
+                })
+            else:
+                index = start_time_list.index(start_time)
+                result[index]['meituan_now_price'] = meituan_now_price
+
+
+
+
+
+
+
+        
         
 
-#http://m.maoyan.com/changecity.json
-#http://%s.meituan.com/dianying/zuixindianying
+

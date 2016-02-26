@@ -107,7 +107,8 @@ class TaobaoMovie(object):
             em[0].decompose()
             end_time_text = td[0].get_text()
             end_time = re.search(r'\d+:\d+', end_time_text).group()
-            now_price = td[4].em.get_text()
+            now_price_text = td[4].em.get_text()
+            now_price = re.match(r'^\d+', now_price_text).group()
 
             if start_time not in start_time_list:
                 start_time_list.append(start_time)

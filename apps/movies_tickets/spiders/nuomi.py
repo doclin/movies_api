@@ -10,7 +10,7 @@ class NuomiMovie(object):
     """
     def __init__(self):
         self.time_out = 2
-        self.connection_error_message = 'taobao crash'
+        self.connection_error_message = 'nuomi crash'
 
     def get_movie_list(self,url,name_list,result):
         try:
@@ -29,15 +29,15 @@ class NuomiMovie(object):
                 href = j['href']
                 nuomi_movie_id = re.search(r'\d+', href).group()
 
-            if name not in name_list:
-                name_list.append(name)
-                result.append({
-                    'name': name,
-                    'nuomi_movie_id': nuomi_movie_id,
-                })
-            else:
-                index = name_list.index(name)
-                result[index]['nuomi_movie_id'] = nuomi_movie_id
+                if name not in name_list:
+                    name_list.append(name)
+                    result.append({
+                        'name': name,
+                        'nuomi_movie_id': nuomi_movie_id,
+                    })
+                else:
+                    index = name_list.index(name)
+                    result[index]['nuomi_movie_id'] = nuomi_movie_id
 
     def get_district_list(self,url,name_list,result):
         try:
@@ -92,6 +92,41 @@ class NuomiMovie(object):
                 index = name_list.index(cinema_name)
                 result[index]['nuomi_cinema_id'] = nuomi_cinema_id
 
+    def get_price_list(self,url,start_time_list,result):
+        try:
+            r = requests.get(url, timeout=self.time_out)
+        except:
+            return self.connection_error_message
+
+        r.encoding = 'utf-8'
+        soup = BeautifulSoup(r.text)
+        div = soup.find('div', class_='table')
+        tr = div.find_all('tr')
+        for i in tr:
+            td = i.find_all('td')
+            end_time_text = td[0].span.get_text()
+            end_time = re.search(r'\d+:\d+', end_time_text).group()
+            td[0].span.decompose()
+            start_time_text = td[0].get_text()
+            start_time = re.search(r'\S+', start_time_text).group()
+            price_text = td[3].span.get_text()
+            nuomi_now_price = re.search(r'\d+', price_text).group()
+
+            if start_time not in start_time_list:
+                start_time_list.append(start_time)
+                result.append({
+                    'start_time': start_time,
+                    'end_time': end_time,
+                    'nuomi_now_price': nuomi_now_price,
+                })
+            else:
+                index = start_time_list.index(start_time)
+                result[index]['nuomi_now_price'] = nuomi_now_price
+            
 
 
-http://hz.nuomi.com/pcindex/main/timetable?cinemaid=37d60a46e6d41f611e1d11c5&mid=9808&needMovieInfo=1&tploption=1&_=1456157781848
+
+        
+
+
+

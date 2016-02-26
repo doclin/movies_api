@@ -36,6 +36,7 @@ class CityAPI(APIView):
                     'city_name': i.city_name,
                     'city_id': i.id,
                     'hot_city': i.hot_city,
+                    'first_char': i.first_char,
                 })
             return Response(response_dict)
 

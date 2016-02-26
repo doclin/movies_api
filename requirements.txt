@@ -3,3 +3,16 @@ djangorestframework==3.3.2
 requests==2.9.1
 beautifulsoup4
 mysql-python
+pytesser
+PIL
+
+<canshu cuowuchuli>
+<mingcheng tongyi>
+<quanbu_ditie shanqu>
+<like meituan currentpage jiancha>
+<space, zhushi>
+<soup not found>
+<list import better>
+<find_all>
+<meituan shoujitehu>
+
