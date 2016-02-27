@@ -1,7 +1,7 @@
 #coding=utf8
 
 from django.conf.urls import url
-from apps.movies_tickets.views import CityAPI, MovieListAPI, DistrictListAPI, CinemaListAPI, PriceListAPI
+from movies_tickets.views import CityAPI, MovieListAPI, DistrictListAPI, CinemaListAPI, PriceListAPI
 
 urlpatterns = [
     url(r'^city/$', CityAPI.as_view()),

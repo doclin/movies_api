@@ -4,6 +4,9 @@ from bs4 import BeautifulSoup
 import requests
 import re
 
+from movies_tickets.models import City
+
+
 class NuomiMovie(object):
     """
     pass
@@ -26,6 +29,9 @@ class NuomiMovie(object):
             a = i.find_all('a')
             for j in a:
                 name = j['title']
+                junk = u'\uff1a'
+                name = name.replace(junk, '')
+                name = name.replace(':', '')
                 href = j['href']
                 nuomi_movie_id = re.search(r'\d+', href).group()
 
@@ -66,7 +72,7 @@ class NuomiMovie(object):
                 index = name_list.index(district_name)
                 result[index]['nuomi_district_id'] = nuomi_district_id
 
-    def get_cinema_list(self,url,name_list,result):
+    def get_cinema_list(self,url,name_list,result,city):
         try:
             r = requests.get(url,timeout=self.time_out)
         except:
@@ -75,12 +81,23 @@ class NuomiMovie(object):
         r.encoding = 'utf-8'
         soup = BeautifulSoup(r.text)
         div = soup.find_all('div', class_='cinema-info clearfix')
+        junk_left = u'\uff08'
+        junk_right = u'\uff09'
+
         for i in div:
             data = i['data-cinema']
             nuomi_cinema_id = re.search(r'(?<=uid":").*(?=","lowe)', data).group()
             h3 = i.find('h3', class_='cib-name')
             text = h3.get_text()
+            
             cinema_name = re.search(r'\S+', text).group()
+            cinema_name = cinema_name.replace('国际', '')
+            cinema_name = cinema_name.replace(city, '')
+            cinema_name = cinema_name.replace(junk_left, '')
+            cinema_name = cinema_name.replace(junk_right, '')
+            cinema_name = cinema_name.replace('(', '')
+            cinema_name = cinema_name.replace(')', '')
+            cinema_name = cinema_name.replace('-', '')
 
             if cinema_name not in name_list:
                 name_list.append(cinema_name)
@@ -122,6 +139,34 @@ class NuomiMovie(object):
             else:
                 index = start_time_list.index(start_time)
                 result[index]['nuomi_now_price'] = nuomi_now_price
+
+    def get_city_list(self, url):
+        try:
+            r = requests.get(url, timeout=self.time_out)
+        except:
+            return self.connection_error_message   
+                 
+        r.encoding = 'utf-8'
+        soup = BeautifulSoup(r.text)
+        li = soup.find_all('li', class_='city-list clearfix')
+        for i in li:
+            a = i.find_all('a')
+            for j in a:
+                name_text = j.get_text()
+                name = re.search(r'\S+', name_text).group()
+                href = j['href']
+                nuomi_city_id = re.search(r'(?<=http://)\w+', href).group()
+                first_char = i.find('span', class_='letter fl').get_text()
+
+                city = City.objects.filter(city_name=name)
+                if city.exists():
+                    city.update(nuomi_city_id=nuomi_city_id)
+                else:
+                    City.objects.create(
+                        city_name=name,
+                        first_char=first_char,
+                        nuomi_city_id=nuomi_city_id,    
+                    )
             
 
 

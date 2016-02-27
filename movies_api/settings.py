@@ -37,7 +37,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'apps.movies_tickets',
+    'movies_tickets',
     'rest_framework',
 )
 

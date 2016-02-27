@@ -4,6 +4,9 @@ from bs4 import BeautifulSoup
 import requests
 import re
 
+from movies_tickets.models import City
+
+
 class TaobaoMovie(object):
     """
     pass
@@ -25,6 +28,9 @@ class TaobaoMovie(object):
         for i in taobao_div:
             span = i.find_all('span', class_='bt-l')
             name = span[0].get_text()
+            junk = u'\uff1a'
+            name = name.replace(junk, '')
+            name = name.replace(':', '')
             a = i.find_all('a')
             taobao_movie_href = a[0]['href']
             taobao_movie_id = re.search(r'(?<=showId=)\d+', taobao_movie_href).group()
@@ -51,7 +57,7 @@ class TaobaoMovie(object):
         #li[2].decompose()
         #li[1].decompose()
         a = li[0].find_all('a')
-        for i in a:
+        for i in a[1:]:
             #taobao_district_href = i['data-param']
             distric_name = i.get_text()
             taobao_district_id = distric_name
@@ -66,7 +72,7 @@ class TaobaoMovie(object):
                 index = name_list.index(distric_name)
                 result[index]['taobao_district_id'] = unicode(taobao_district_id)
 
-    def get_cinema_list(self,url,name_list,result):
+    def get_cinema_list(self,url,name_list,result,city):
         try:
             r = requests.get(url, timeout=self.time_out)
         except:
@@ -75,8 +81,18 @@ class TaobaoMovie(object):
         soup = BeautifulSoup(r.text)
         div = soup.find_all('div', class_='select-tags')
         a = div[1].find_all('a')
+        junk_left = u'\uff08'
+        junk_right = u'\uff09'
+
         for i in a:
             cinema_name = i.get_text()
+            cinema_name = cinema_name.replace('国际', '')
+            cinema_name = cinema_name.replace(city, '')
+            cinema_name = cinema_name.replace(junk_left, '')
+            cinema_name = cinema_name.replace(junk_right, '')
+            cinema_name = cinema_name.replace('(', '')
+            cinema_name = cinema_name.replace(')', '')
+            cinema_name = cinema_name.replace('-', '')
             taobao_cinema_href = i['data-param']
             taobao_cinema_id = re.search(r'(?<=cinemaId=)\d+', taobao_cinema_href).group()
 
@@ -121,15 +137,27 @@ class TaobaoMovie(object):
                 index = start_time_list.index(start_time)
                 result[index]['taobao_now_price'] = now_price
 
+    def get_city_list(self, url):
+        try:
+            r = requests.get(url)
+        except:
+            return self.connection_error_message
 
+        info = re.findall(r'"id":.*?pinYin":"\w?', r.text)
+        for i in info:
+            taobao_city_id = re.search(r'(?<="cityCode":)\d+', i).group()
+            name = re.search(r'(?<="regionName":").*?(?=")', i).group()
+            first_char = i[-1]
 
-
-
-
-
-
-
-
+            city = City.objects.filter(city_name=name)
+            if city.exists():
+                city.update(taobao_city_id=taobao_city_id)
+            else:
+                City.objects.create(
+                    city_name=name,
+                    first_char=first_char,
+                    taobao_city_id=taobao_city_id
+                )
 
 
 

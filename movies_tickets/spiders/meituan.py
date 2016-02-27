@@ -7,6 +7,8 @@ import re
 from PIL import Image,ImageStat
 from StringIO import StringIO
 
+from movies_tickets.models import City
+
 
 class MeituanMovie(object):
     """
@@ -16,29 +18,28 @@ class MeituanMovie(object):
         self.time_out = 2
         self.connection_error_message = 'meituan crash'
 
-    def get_movie_list(self,url,name_list,result):
-        try:
-            r = requests.get(url)
-        except:
-            return self.connection_error_message
+    def get_movie_list(self,url):
+        #try:
+        r = requests.get(url)
 
         soup = BeautifulSoup(r.text)
         meituan_div = soup.find_all('div', class_='movie-cell')
+        result = []
+
         for i in meituan_div:
             a = i.find_all('a')
             name = a[0]['title']
+            junk = u'\uff1a'
+            name = name.replace(junk, '')
+            name = name.replace(':', '')
             meituan_movie_href = a[0]['href']
             meituan_movie_id = re.search(r'\d+', meituan_movie_href).group()
 
-            if name not in name_list:
-                name_list.append(name)
-                result.append({
-                    'movie_name': name,
-                    'meituan_movie_id': meituan_movie_id,
-                })  
-            else:
-                index = name_list.index(name)   
-                result[index]['meituan_movie_id'] = meituan_movie_id
+            result.append({
+                'movie_name': name,
+                'meituan_movie_id': meituan_movie_id,
+            })
+        return result
 
     def get_district_list(self,url,name_list,result):
         try:
@@ -56,6 +57,9 @@ class MeituanMovie(object):
             meituan_district_href = i['href']
             meituan_district_id = re.search(r'[a-z]+(?=/all)', meituan_district_href).group()
 
+            if meituan_district_id == 'all' or meituan_district_id == 'subway':
+                continue
+
             if distric_name not in name_list:
                 name_list.append(distric_name)
                 result.append({
@@ -66,20 +70,30 @@ class MeituanMovie(object):
                 index = name_list.index(distric_name)
                 result[index]['meituan_district_id'] = meituan_district_id
 
-    def get_cinema_list(self,url,name_list,result):
+    def get_cinema_list(self,url,name_list,result,city):
         try:
             r = requests.get(url)
         except:
             return self.connection_error_message
         soup = BeautifulSoup(r.text)
         div = soup.find_all('div', class_='J-cinema-item cinema-item cf')
-        print div
+        junk_left = u'\uff08'
+        junk_right = u'\uff09'
+
         for i in div:
             h4 = i.find('h4')
             a = h4.find('a')
             meituan_cinema_href = a['href']
             meituan_cinema_id = re.search(r'(?<=/shop/)\d+', meituan_cinema_href).group()
+
             cinema_name = a.get_text()
+            cinema_name = cinema_name.replace('国际', '')
+            cinema_name = cinema_name.replace(city, '')
+            cinema_name = cinema_name.replace(junk_left, '')
+            cinema_name = cinema_name.replace(junk_right, '')
+            cinema_name = cinema_name.replace('(', '')
+            cinema_name = cinema_name.replace(')', '')
+            cinema_name = cinema_name.replace('-', '')
 
             if cinema_name not in name_list: 
                 name_list.append(cinema_name)
@@ -102,6 +116,7 @@ class MeituanMovie(object):
         soup = BeautifulSoup(r.text)
         table = soup.find('table',class_='time-table time-table--current')
         tr = table.find_all('tr')
+        
         for i in tr[1:]:
             td = i.find_all('td')
             time = td[0]
@@ -122,6 +137,7 @@ class MeituanMovie(object):
             fixed_url = 'http:' + fixed_add
             img_request = requests.get(fixed_url)
             img = Image.open(StringIO(img_request.content))
+            
 
             for j in i_tag:
                 style = j['style']
@@ -162,13 +178,38 @@ class MeituanMovie(object):
                 index = start_time_list.index(start_time)
                 result[index]['meituan_now_price'] = meituan_now_price
 
+    def get_city_list(self, url):
+        try:
+            r = requests.get(url)
+        except:
+            return self.connection_error_message
+
+        soup = BeautifulSoup(r.text)
+        ol = soup.find_all('ol', class_='hasallcity')
+        li = ol[0].find_all('li')
+        for i in li:
+            a = i.find_all('a')
+            for j in a:
+                href = j['href']
+                meituan_city_id = re.search(r'(?<=://).*(?=\.m)', href).group()
+                name = j.get_text()
+                first_char = i['id'][-1]
+
+                city = City.objects.filter(city_name=name)
+                if city.exists():
+                    city.update(meituan_city_id=meituan_city_id)
+                else:
+                    City.objects.create(
+                        city_name=name,
+                        first_char=first_char,
+                        meituan_city_id=meituan_city_id,
+                    )  
 
 
 
 
 
 
-        
-        
+
 
 

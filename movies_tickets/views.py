@@ -2,11 +2,10 @@
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from django.views.decorators.csrf import csrf_exempt
 
-from apps.movies_tickets.models import City
-from apps.movies_tickets.tasks import MovieList, DistrictList, CinemaList, PriceList, CityList
-from apps.movies_tickets.serializers import CityListSerializer, MovieListSerializer, DistrictListSerializer, CinemaListSerializer, PriceListSerializer
+from movies_tickets.models import City
+from movies_tickets.tasks import MovieList, DistrictList, CinemaList, PriceList, CityList
+from movies_tickets.serializers import CityListSerializer, MovieListSerializer, DistrictListSerializer, CinemaListSerializer, PriceListSerializer
 
 
 
