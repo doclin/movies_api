@@ -15,16 +15,15 @@ class TaobaoMovie(object):
         self.time_out = 2
         self.connection_error_message = 'taobao crash'
 
-    def get_movie_list(self,url,name_list,result):
-        try:
-            r = requests.get(url, timeout=self.time_out)
-        except:
-            return self.connection_error_message
+    def get_movie_list(self,url):
+        r = requests.get(url, timeout=self.time_out)
 
         soup = BeautifulSoup(r.text)
         junk = soup.find_all('div', class_='tab-movie-list')
         junk[1].decompose()
         taobao_div = soup.find_all('div', class_='movie-card-wrap')
+        result = []
+
         for i in taobao_div:
             span = i.find_all('span', class_='bt-l')
             name = span[0].get_text()
@@ -35,54 +34,45 @@ class TaobaoMovie(object):
             taobao_movie_href = a[0]['href']
             taobao_movie_id = re.search(r'(?<=showId=)\d+', taobao_movie_href).group()
 
-            if name not in name_list:
-                name_list.append(name)
-                result.append({
-                    'name': name,
-                    'taobao_movie_id': taobao_movie_id,
-                })
-            else:
-                index = name_list.index(name)
-                result[index]['taobao_movie_id'] = taobao_movie_id
+            result.append({
+                'movie_name': name,
+                'meituan_movie_id': '',
+                'nuomi_movie_id': '',
+                'taobao_movie_id': taobao_movie_id,
+            })
+        return result
 
-    def get_district_list(self,url,name_list,result):
-        try:
-            r = requests.get(url, timeout=self.time_out)
-        except:
-            return self.connection_error_message
+    def get_district_list(self,url):
+        r = requests.get(url, timeout=self.time_out)
 
         soup = BeautifulSoup(r.text)
         ul = soup.find_all('ul', class_='filter-select')
         li = ul[0].find_all('li')
-        #li[2].decompose()
-        #li[1].decompose()
         a = li[0].find_all('a')
+        result = []
+
         for i in a[1:]:
             #taobao_district_href = i['data-param']
             distric_name = i.get_text()
             taobao_district_id = distric_name
 
-            if distric_name not in name_list:
-                name_list.append(distric_name)
-                result.append({
-                    'distric_name': distric_name,
-                    'taobao_district_id': taobao_district_id,
-                })
-            else:
-                index = name_list.index(distric_name)
-                result[index]['taobao_district_id'] = unicode(taobao_district_id)
+            result.append({
+                'district_name': distric_name,
+                'meituan_district_id': '',
+                'nuomi_district_id': '',
+                'taobao_district_id': taobao_district_id,
+            })
+        return result
 
-    def get_cinema_list(self,url,name_list,result,city):
-        try:
-            r = requests.get(url, timeout=self.time_out)
-        except:
-            return self.connection_error_message
+    def get_cinema_list(self,url,city):
+        r = requests.get(url, timeout=self.time_out)
 
         soup = BeautifulSoup(r.text)
         div = soup.find_all('div', class_='select-tags')
         a = div[1].find_all('a')
         junk_left = u'\uff08'
         junk_right = u'\uff09'
+        result = []
 
         for i in a:
             cinema_name = i.get_text()
@@ -96,26 +86,23 @@ class TaobaoMovie(object):
             taobao_cinema_href = i['data-param']
             taobao_cinema_id = re.search(r'(?<=cinemaId=)\d+', taobao_cinema_href).group()
 
-            if cinema_name not in name_list:
-                name_list.append(cinema_name)
-                result.append({
-                    'cinema_name': cinema_name,
-                    'taobao_cinema_id': taobao_cinema_id,
-                })
-            else:
-                index = name_list.index(cinema_name)
-                result[index]['taobao_cinema_id'] = taobao_cinema_id    
+            result.append({
+                'cinema_name': cinema_name,
+                'meituan_cinema_id': '',
+                'nuomi_cinema_id': '',
+                'taobao_cinema_id': taobao_cinema_id,
+            })
+        return result
 
-    def get_price_list(self,url,start_time_list,result):
-        try:
-            r = requests.get(url, timeout=self.time_out)
-        except:
-            return self.connection_error_message
+    def get_price_list(self,url):
+        r = requests.get(url, timeout=self.time_out)
 
         soup = BeautifulSoup(r.text)
         thead = soup.find_all('thead')
         thead[0].decompose()
         tr = soup.find_all('tr')
+        result = []
+
         for i in tr:
             td = i.find_all('td')
             em = td[0].find_all('em')
@@ -126,20 +113,18 @@ class TaobaoMovie(object):
             now_price_text = td[4].em.get_text()
             now_price = re.match(r'^\d+', now_price_text).group()
 
-            if start_time not in start_time_list:
-                start_time_list.append(start_time)
-                result.append({
-                    'start_time': start_time,
-                    'end_time': end_time,
-                    'taobao_now_price': now_price,
-                })
-            else:
-                index = start_time_list.index(start_time)
-                result[index]['taobao_now_price'] = now_price
+            result.append({
+                'start_time': start_time,
+                'end_time': end_time,
+                'meituan_now_price': '',
+                'nuomi_now_price': '',
+                'taobao_now_price': now_price,
+            })
+        return result
 
     def get_city_list(self, url):
         try:
-            r = requests.get(url)
+            r = requests.get(url, timeout=self.time_out)
         except:
             return self.connection_error_message
 

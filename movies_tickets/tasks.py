@@ -4,6 +4,7 @@ import sys, os
 
 from bs4 import BeautifulSoup
 import requests
+from requests import RequestException
 import re
 
 from movies_tickets.models import City
@@ -29,33 +30,57 @@ class MovieList(object):
         self.nuomi_url = ('http://%s.nuomi.com/pcindex/main/filmlist?type=1' % self.nuomi_city_id)
         self.taobao_url = ('https://dianying.taobao.com/showList.htm?city=%s' % self.taobao_city_id)
 
-        self.result = []
-        self.name_list = []
+        self.result = [[]]
+        self.name_list = ['']
 
     def get_movie_list(self):
         if self.meituan_city_id:
             meituan_movie = MeituanMovie()
-            meituan_result = meituan_movie.get_movie_list(self.meituan_url)
-            for meituan_movie in meituan_result:
-                if meituan_movie['movie_name'] not in self.name_list:
-                    self.name_list.append(meituan_movie['movie_name'])
-                    self.result.append(meituan_movie)
-                else:
-                    index = self.name_list.index(meituan_movie['movie_name'])
-                    self.result[index]['meituan_movie_id'] = meituan_movie['meituan_movie_id']
-
+            try:
+                meituan_result = meituan_movie.get_movie_list(self.meituan_url)
+                for meituan_movie in meituan_result:
+                    if meituan_movie['movie_name'] not in self.name_list:
+                        self.name_list.append(meituan_movie['movie_name'])
+                        self.result.append(meituan_movie)
+                    else:
+                        index = self.name_list.index(meituan_movie['movie_name'])
+                        self.result[index]['meituan_movie_id'] = meituan_movie['meituan_movie_id']
+            except RequestException: 
+                self.result[0].append('meituan connection broken')
+            except:
+                self.result[0].append('meituan unknown error')                   
 
         if self.nuomi_city_id:
             nuomi_movie = NuomiMovie()
-            nuomi_error = nuomi_movie.get_movie_list(self.nuomi_url, self.name_list, self.result)
-            if nuomi_error:
-                self.result[0].append(nuomi_error)
+            try:
+                nuomi_result = nuomi_movie.get_movie_list(self.nuomi_url)
+                for nuomi_movie in nuomi_result:
+                    if nuomi_movie['movie_name'] not in self.name_list:
+                        self.name_list.append(nuomi_movie['movie_name'])
+                        self.result.append(nuomi_movie)
+                    else:
+                        index = self.name_list.index(nuomi_movie['movie_name'])
+                        self.result[index]['nuomi_movie_id'] = nuomi_movie['nuomi_movie_id']
+            except RequestException:
+                self.result[0].append('nuomi connection broken')
+            except:
+                self.result[0].append('nuomi unknown error')
 
         if self.taobao_city_id:
             taobao_movie = TaobaoMovie()
-            taobao_error = taobao_movie.get_movie_list(self.taobao_url, self.name_list, self.result)
-            if taobao_error:
-                self.result[0].append(taobao_error)
+            try:
+                taobao_result = taobao_movie.get_movie_list(self.taobao_url)
+                for taobao_movie in taobao_result:
+                    if taobao_movie['movie_name'] not in self.name_list:
+                        self.name_list.append(taobao_movie['movie_name'])
+                        self.result.append(taobao_movie)
+                    else:
+                        index = self.name_list.index(taobao_movie['movie_name'])
+                        self.result[index]['taobao_movie_id'] = taobao_movie['taobao_movie_id']
+            except RequestException:
+                self.result[0].append('taobao connection broken')
+            except:
+                self.result[0].append('taobao unknown error')
 
         return self.result
 
@@ -80,27 +105,42 @@ class DistrictList(object):
         self.taobao_url = ('https://dianying.taobao.com/showDetailSchedule.htm?showId=%s&city=%s'
                            %(self.taobao_movie_id, self.taobao_city_id))
 
-        self.result = [[]]
-        self.name_list = ['']
+        self.result = []
+        self.name_list = []
 
     def get_district_list(self):
         if self.meituan_city_id and self.meituan_movie_id:
             meituan_movie = MeituanMovie()
-            meituan_error = meituan_movie.get_district_list(self.meituan_url, self.name_list, self.result)
-            if meituan_error:
-                self.result[0].append(meituan_error)
-
+            meituan_result = meituan_movie.get_district_list(self.meituan_url)
+            for meituan_district in meituan_result:
+                if meituan_district['district_name'] not in self.name_list:
+                    self.name_list.append(meituan_district['district_name'])
+                    self.result.append(meituan_district)
+                else:
+                    index = self.name_list.index(meituan_district['district_name'])
+                    self.result[index]['meituan_district_id'] = meituan_district['meituan_district_id']
+                    
         if self.nuomi_city_id and self.nuomi_movie_id:
             nuomi_movie = NuomiMovie()
-            nuomi_error = nuomi_movie.get_district_list(self.nuomi_url, self.name_list, self.result)
-            if nuomi_error:
-                self.result[0].append(nuomi_error)
+            nuomi_result = nuomi_movie.get_district_list(self.nuomi_url)
+            for nuomi_district in nuomi_result:
+                if nuomi_district['district_name'] not in self.name_list:
+                    self.name_list.append(nuomi_district['district_name'])
+                    self.result.append(nuomi_district)
+                else:
+                    index = self.name_list.index(nuomi_district['district_name'])
+                    self.result[index]['nuomi_district_id'] = nuomi_district['nuomi_district_id']
 
         if self.taobao_city_id and self.taobao_movie_id:
             taobao_movie = TaobaoMovie()
-            taobao_error = taobao_movie.get_district_list(self.taobao_url, self.name_list, self.result)
-            if taobao_error:
-                self.result[0].append(taobao_error)
+            taobao_result = taobao_movie.get_district_list(self.taobao_url)
+            for taobao_district in taobao_result:
+                if taobao_district['district_name'] not in self.name_list:
+                    self.name_list.append(taobao_district['district_name'])
+                    self.result.append(taobao_district)
+                else:
+                    index = self.name_list.index(taobao_district['district_name'])
+                    self.result[index]['taobao_district_id'] = taobao_district['taobao_district_id']
 
         return self.result
 
@@ -130,27 +170,42 @@ class CinemaList(object):
         self.taobao_url = ('https://dianying.taobao.com/showDetailSchedule.htm?showId=%s&regionName=%s&city=%s'
                             %(self.taobao_movie_id, unicode(self.taobao_district_id), self.taobao_city_id))
 
-        self.result = [[]]
-        self.name_list = ['']
+        self.result = []
+        self.name_list = []
 
     def get_cinema_list(self):
         if self.meituan_district_id:
             meituan_movie = MeituanMovie()
-            meituan_error = meituan_movie.get_cinema_list(self.meituan_url, self.name_list, self.result, self.city_byte)
-            if meituan_error:
-                self.result[0].append(meituan_error)
+            meituan_result = meituan_movie.get_cinema_list(self.meituan_url, self.city_byte)
+            for meituan_cinema in meituan_result:
+                if meituan_cinema['cinema_name'] not in self.name_list:
+                    self.name_list.append(meituan_cinema['cinema_name'])
+                    self.result.append(meituan_cinema)
+                else:
+                    index = self.name_list.index(meituan_cinema['cinema_name'])
+                    self.result[index]['meituan_cinema_id'] = meituan_cinema['meituan_cinema_id']
 
         if self.nuomi_district_id:
             nuomi_movie = NuomiMovie()
-            nuomi_error = nuomi_movie.get_cinema_list(self.nuomi_url, self.name_list, self.result, self.city_byte)
-            if nuomi_error:
-                self.result[0].append(nuomi_error)
+            nuomi_result = nuomi_movie.get_cinema_list(self.nuomi_url, self.city_byte)
+            for nuomi_cinema in nuomi_result:
+                if nuomi_cinema['cinema_name'] not in self.name_list:
+                    self.name_list.append(nuomi_cinema['cinema_name'])
+                    self.result.append(nuomi_cinema)
+                else:
+                    index = self.name_list.index(nuomi_cinema['cinema_name'])
+                    self.result[index]['nuomi_cinema_id'] = nuomi_cinema['nuomi_cinema_id']
 
         if self.taobao_district_id:
             taobao_movie = TaobaoMovie()
-            taobao_error = taobao_movie.get_cinema_list(self.taobao_url, self.name_list, self.result, self.city_byte)
-            if taobao_error:
-                self.result[0].append(taobao_error)
+            taobao_result = taobao_movie.get_cinema_list(self.taobao_url, self.city_byte)
+            for taobao_cinema in taobao_result:
+                if taobao_cinema['cinema_name'] not in self.name_list:
+                    self.name_list.append(taobao_cinema['cinema_name'])
+                    self.result.append(taobao_cinema)
+                else:
+                    index = self.name_list.index(taobao_cinema['cinema_name'])
+                    self.result[index]['taobao_cinema_id'] = taobao_cinema['taobao_cinema_id']
 
         return self.result
 
@@ -179,27 +234,42 @@ class PriceList(object):
         self.taobao_url = ('https://dianying.taobao.com/showDetailSchedule.htm?showId=%s&city=%s&cinemaId=%s'
                             %(self.taobao_movie_id, self.taobao_city_id ,self.taobao_cinema_id))
 
-        self.result = [[]]
-        self.start_time_list = ['']
+        self.result = []
+        self.start_time_list = []
 
     def get_price_list(self):
         if self.meituan_cinema_id:
             meituan_movie = MeituanMovie()
-            meituan_error = meituan_movie.get_price_list(self.meituan_url, self.start_time_list, self.result)
-            if meituan_error:
-                self.result[0].append(meituan_error)
+            meituan_result = meituan_movie.get_price_list(self.meituan_url)
+            for meituan_price in meituan_result:
+                if meituan_price['start_time'] not in self.start_time_list:
+                    self.start_time_list.append(meituan_price['start_time'])
+                    self.result.append(meituan_price)
+                else:
+                    index = self.start_time_list.index(meituan_price['start_time'])
+                    self.result[index]['meituan_now_price'] = meituan_price['meituan_now_price']
 
         if self.nuomi_cinema_id:
             nuomi_movie = NuomiMovie()
-            nuomi_error = nuomi_movie.get_price_list(self.nuomi_url, self.start_time_list, self.result)
-            if nuomi_error:
-                self.result[0].append(nuomi_error)
+            nuomi_result = nuomi_movie.get_price_list(self.nuomi_url)
+            for nuomi_price in nuomi_result:
+                if nuomi_price['start_time'] not in self.start_time_list:
+                    self.start_time_list.append(nuomi_price['start_time'])
+                    self.result.append(nuomi_price)
+                else:
+                    index = self.start_time_list.index(nuomi_price['start_time'])
+                    self.result[index]['nuomi_now_price'] = nuomi_price['nuomi_now_price']
 
         if self.taobao_cinema_id:
             taobao_movie = TaobaoMovie()
-            taobao_error = taobao_movie.get_price_list(self.taobao_url, self.start_time_list, self.result)
-            if taobao_error:
-                self.result[0].append(taobao_error)
+            taobao_result = taobao_movie.get_price_list(self.taobao_url)
+            for taobao_price in taobao_result:
+                if taobao_price['start_time'] not in self.start_time_list:
+                    self.start_time_list.append(taobao_price['start_time'])
+                    self.result.append(taobao_price)
+                else:
+                    index = self.start_time_list.index(taobao_price['start_time'])
+                    self.result[index]['taobao_now_price'] = taobao_price['taobao_now_price']
 
         return self.result
 
@@ -218,17 +288,17 @@ class CityList(object):
         meituan_movie = MeituanMovie()
         meituan_error = meituan_movie.get_city_list(self.meituan_url)
         if meituan_error:
-            self.result.append(meituan_error)
+            self.result.append('meituan_error')
 
         nuomi_movie = NuomiMovie()
         nuomi_error = nuomi_movie.get_city_list(self.nuomi_url)
         if nuomi_error:
-            self.result.append(nuomi_error)
+            self.result.append('nuomi_error')
 
         taobao_movie = TaobaoMovie()
         taobao_error = taobao_movie.get_city_list(self.taobao_url)
         if taobao_error:
-            self.result.append(taobao_error)
+            self.result.append('taobao_error')
 
         return self.result
 

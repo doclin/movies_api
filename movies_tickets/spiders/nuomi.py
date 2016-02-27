@@ -15,16 +15,15 @@ class NuomiMovie(object):
         self.time_out = 2
         self.connection_error_message = 'nuomi crash'
 
-    def get_movie_list(self,url,name_list,result):
-        try:
-            r = requests.get(url,timeout=self.time_out)
-        except:
-            return self.connection_error_message
+    def get_movie_list(self,url):
+        r = requests.get(url,timeout=self.time_out)
         
         r.encoding = 'utf-8'
         soup = BeautifulSoup(r.text)
         ul = soup.find('ul', class_='clearfix j-sliders')
         li = ul.find_all('li')
+        result = []
+
         for i in li:
             a = i.find_all('a')
             for j in a:
@@ -35,26 +34,23 @@ class NuomiMovie(object):
                 href = j['href']
                 nuomi_movie_id = re.search(r'\d+', href).group()
 
-                if name not in name_list:
-                    name_list.append(name)
-                    result.append({
-                        'name': name,
-                        'nuomi_movie_id': nuomi_movie_id,
-                    })
-                else:
-                    index = name_list.index(name)
-                    result[index]['nuomi_movie_id'] = nuomi_movie_id
+                result.append({
+                    'movie_name': name,
+                    'meituan_movie_id': '',
+                    'nuomi_movie_id': nuomi_movie_id,
+                    'taobao_movie_id': '',
+                })
+        return result
 
-    def get_district_list(self,url,name_list,result):
-        try:
-            r = requests.get(url,timeout=self.time_out)
-        except:
-            return self.connection_error_message
+    def get_district_list(self,url):
+        r = requests.get(url,timeout=self.time_out)
 
         r.encoding = 'utf-8'
         soup = BeautifulSoup(r.text)
         div = soup.find('div', id='j-district-item-wrap')
         span = div.find_all('span')
+        result = []
+
         for i in span:
             a = i.parent
             i.decompose()
@@ -62,27 +58,24 @@ class NuomiMovie(object):
             href = a['href']
             nuomi_district_id = re.search(r'(?<=\d/).*(?=/sub)', href).group()
 
-            if district_name not in name_list:
-                name_list.append(district_name)
-                result.append({
-                    'district_name': district_name,
-                    'nuomi_district_id': nuomi_district_id,
-                })
-            else:
-                index = name_list.index(district_name)
-                result[index]['nuomi_district_id'] = nuomi_district_id
+            result.append({
+                'district_name': district_name,
+                'meituan_district_id': '',
+                'nuomi_district_id': nuomi_district_id,
+                'taobao_district_id': '',
+            })
 
-    def get_cinema_list(self,url,name_list,result,city):
-        try:
-            r = requests.get(url,timeout=self.time_out)
-        except:
-            return self.connection_error_message
+        return result
+
+    def get_cinema_list(self,url,city):
+        r = requests.get(url,timeout=self.time_out)
 
         r.encoding = 'utf-8'
         soup = BeautifulSoup(r.text)
         div = soup.find_all('div', class_='cinema-info clearfix')
         junk_left = u'\uff08'
         junk_right = u'\uff09'
+        result = []
 
         for i in div:
             data = i['data-cinema']
@@ -99,26 +92,24 @@ class NuomiMovie(object):
             cinema_name = cinema_name.replace(')', '')
             cinema_name = cinema_name.replace('-', '')
 
-            if cinema_name not in name_list:
-                name_list.append(cinema_name)
-                result.append({
-                    'cinema_name': cinema_name,
-                    'nuomi_cinema_id': nuomi_cinema_id,
-                })
-            else:
-                index = name_list.index(cinema_name)
-                result[index]['nuomi_cinema_id'] = nuomi_cinema_id
+            result.append({
+                'cinema_name': cinema_name,
+                'meituan_cinema_id': '',
+                'nuomi_cinema_id': nuomi_cinema_id,
+                'taobao_cinema_id': '',
+            })
 
-    def get_price_list(self,url,start_time_list,result):
-        try:
-            r = requests.get(url, timeout=self.time_out)
-        except:
-            return self.connection_error_message
+        return result
+
+    def get_price_list(self,url):
+        r = requests.get(url, timeout=self.time_out)
 
         r.encoding = 'utf-8'
         soup = BeautifulSoup(r.text)
         div = soup.find('div', class_='table')
         tr = div.find_all('tr')
+        result = []
+
         for i in tr:
             td = i.find_all('td')
             end_time_text = td[0].span.get_text()
@@ -129,16 +120,15 @@ class NuomiMovie(object):
             price_text = td[3].span.get_text()
             nuomi_now_price = re.search(r'\d+', price_text).group()
 
-            if start_time not in start_time_list:
-                start_time_list.append(start_time)
-                result.append({
-                    'start_time': start_time,
-                    'end_time': end_time,
-                    'nuomi_now_price': nuomi_now_price,
-                })
-            else:
-                index = start_time_list.index(start_time)
-                result[index]['nuomi_now_price'] = nuomi_now_price
+            result.append({
+                'start_time': start_time,
+                'end_time': end_time,
+                'meituan_now_price': '',
+                'nuomi_now_price': nuomi_now_price,
+                'taobao_now_price': '',
+            })
+
+        return result
 
     def get_city_list(self, url):
         try:

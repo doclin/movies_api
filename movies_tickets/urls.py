@@ -8,5 +8,5 @@ urlpatterns = [
     url(r'^movie/$', MovieListAPI.as_view()),
     url(r'^district/$', DistrictListAPI.as_view()),
     url(r'^cinema/$', CinemaListAPI.as_view()),
-    url(r'^price/$', PriceListAPI.as_view()),
+    url(r'^ticket/$', PriceListAPI.as_view()),
 ]

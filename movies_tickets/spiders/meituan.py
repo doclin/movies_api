@@ -15,13 +15,10 @@ class MeituanMovie(object):
     pass
     """
     def __init__(self):
-        self.time_out = 2
-        self.connection_error_message = 'meituan crash'
+        self.time_out = 3
 
     def get_movie_list(self,url):
-        #try:
-        r = requests.get(url)
-
+        r = requests.get(url, timeout=self.time_out)
         soup = BeautifulSoup(r.text)
         meituan_div = soup.find_all('div', class_='movie-cell')
         result = []
@@ -38,20 +35,18 @@ class MeituanMovie(object):
             result.append({
                 'movie_name': name,
                 'meituan_movie_id': meituan_movie_id,
+                'nuomi_movie_id': '',
+                'taobao_movie_id': '',
             })
         return result
 
-    def get_district_list(self,url,name_list,result):
-        try:
-            r = requests.get(url)
-        except:
-            return self.connection_error_message
-
+    def get_district_list(self,url):
+        r = requests.get(url, timeout=self.time_out)
         soup = BeautifulSoup(r.text)
         ul = soup.find_all('ul', class_='inline-block-list')
-        #ul[2].decompose()
-        #ul[0].decompose()
         a = ul[1].find_all('a')
+        result = []
+
         for i in a:
             distric_name = i.get_text()
             meituan_district_href = i['href']
@@ -60,25 +55,21 @@ class MeituanMovie(object):
             if meituan_district_id == 'all' or meituan_district_id == 'subway':
                 continue
 
-            if distric_name not in name_list:
-                name_list.append(distric_name)
-                result.append({
-                    'distric_name': distric_name,
-                    'meituan_district_id': meituan_district_id,
-                })      
-            else:
-                index = name_list.index(distric_name)
-                result[index]['meituan_district_id'] = meituan_district_id
+            result.append({
+                'district_name': distric_name,
+                'meituan_district_id': meituan_district_id,
+                'nuomi_district_id': '',
+                'taobao_district_id': '',
+            })
+        return result
 
-    def get_cinema_list(self,url,name_list,result,city):
-        try:
-            r = requests.get(url)
-        except:
-            return self.connection_error_message
+    def get_cinema_list(self,url,city):
+        r = requests.get(url, timeout=self.time_out)
         soup = BeautifulSoup(r.text)
         div = soup.find_all('div', class_='J-cinema-item cinema-item cf')
         junk_left = u'\uff08'
         junk_right = u'\uff09'
+        result = []
 
         for i in div:
             h4 = i.find('h4')
@@ -95,27 +86,23 @@ class MeituanMovie(object):
             cinema_name = cinema_name.replace(')', '')
             cinema_name = cinema_name.replace('-', '')
 
-            if cinema_name not in name_list: 
-                name_list.append(cinema_name)
-                result.append({
-                    'cinema_name':cinema_name,
-                    'meituan_cinema_id':meituan_cinema_id,
-                })      
-            else:
-                index = name_list.index(cinema_name)
-                result[index]['meituan_cinema_id'] = meituan_cinema_id
+            result.append({
+                'cinema_name': cinema_name,
+                'meituan_cinema_id': meituan_cinema_id,
+                'nuomi_cinema_id': '',
+                'taobao_cinema_id': '',
+            })
+        return result
 
-    def get_price_list(self,url,start_time_list,result):
-        try:
-            r = requests.get(url)
-        except:
-            return self.connection_error_message
 
+
+    def get_price_list(self,url):
+        r = requests.get(url,timeout=self.time_out)
         sum_list = [6647, 3631, 6680, 6137, 5955, 6603, 7381, 4637, 7431, 7304, 575]
-
         soup = BeautifulSoup(r.text)
         table = soup.find('table',class_='time-table time-table--current')
         tr = table.find_all('tr')
+        result = []
         
         for i in tr[1:]:
             td = i.find_all('td')
@@ -135,7 +122,7 @@ class MeituanMovie(object):
             fixed_add = i_tag[0]['style']
             fixed_add = re.search(r'//s0\.mei.*(?=\);)', fixed_add).group()
             fixed_url = 'http:' + fixed_add
-            img_request = requests.get(fixed_url)
+            img_request = requests.get(fixed_url, timeout=self.time_out)
             img = Image.open(StringIO(img_request.content))
             
 
@@ -150,7 +137,7 @@ class MeituanMovie(object):
 
                 if img_add != fixed_add:
                     img_url = 'http:' + img_add
-                    j_request = requests.get(img_url)
+                    j_request = requests.get(img_url, timeout=self.time_out)
                     j_img = Image.open(StringIO(j_request.content))
                     img_result = j_img.crop(box)
                     result_sta = ImageStat.Stat(img_result)
@@ -167,16 +154,15 @@ class MeituanMovie(object):
                     num_str = '.'
                     meituan_now_price = meituan_now_price + num_str
 
-            if start_time not in start_time_list:
-                start_time_list.append(start_time)
-                result.append({
-                    'start_time': start_time,
-                    'end_time': end_time,
-                    'meituan_now_price': meituan_now_price,
-                })
-            else:
-                index = start_time_list.index(start_time)
-                result[index]['meituan_now_price'] = meituan_now_price
+            result.append({
+                'start_time': start_time,
+                'end_time': end_time,
+                'meituan_now_price': meituan_now_price,
+                'nuomi_now_price': '',
+                'taobao_now_price': '',
+            })
+        return result
+
 
     def get_city_list(self, url):
         try:

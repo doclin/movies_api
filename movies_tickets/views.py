@@ -1,12 +1,13 @@
 #coding=utf8
 
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from movies_tickets.models import City
 from movies_tickets.tasks import MovieList, DistrictList, CinemaList, PriceList, CityList
 from movies_tickets.serializers import CityListSerializer, MovieListSerializer, DistrictListSerializer, CinemaListSerializer, PriceListSerializer
-
+from movies_tickets.response import DoesNotExistResponse, UnKnownResponse
 
 
 class CityAPI(APIView):
@@ -22,22 +23,21 @@ class CityAPI(APIView):
         serializer = self.serializer_class(data=request.query_params)
         serializer.is_valid(raise_exception=True)
         update = serializer.validated_data.get('update')
+        result = []
 
         if update:
             city_list = CityList()
             result = city_list.update()
-            return Response(result)
-        else:
-            cities = City.objects.all()
-            response_dict = []
-            for i in cities:
-                response_dict.append({
-                    'city_name': i.city_name,
-                    'city_id': i.id,
-                    'hot_city': i.hot_city,
-                    'first_char': i.first_char,
-                })
-            return Response(response_dict)
+        
+        cities = City.objects.all()
+        for i in cities:
+            result.append({
+                'city_name': i.city_name,
+                'city_id': i.id,
+                'hot_city': i.hot_city,
+                'first_char': i.first_char,
+            })
+        return Response(result)
 
 
 class MovieListAPI(APIView):
@@ -54,8 +54,13 @@ class MovieListAPI(APIView):
         serializer.is_valid(raise_exception=True)
 
         city_id = serializer.validated_data.get('city_id')
+        try:
+            movie_list = MovieList(city_id)
+        except ObjectDoesNotExist:
+            return DoesNotExistResponse()
+        except:
+            return UnKnownResponse()
 
-        movie_list = MovieList(city_id)
         task_result = movie_list.get_movie_list()
         return Response(task_result)
 
@@ -79,8 +84,14 @@ class DistrictListAPI(APIView):
             'nuomi_movie_id': serializer.validated_data.get('nuomi_movie_id'),
             'taobao_movie_id': serializer.validated_data.get('taobao_movie_id'),
         }
+        
+        try:
+            district_list = DistrictList(city_id, **dic)
+        except ObjectDoesNotExist:
+            return DoesNotExistResponse()
+        except:
+            return UnKnownResponse()
 
-        district_list = DistrictList(city_id, **dic)
         task_result = district_list.get_district_list()
         return Response(task_result)
 
@@ -107,8 +118,14 @@ class CinemaListAPI(APIView):
             'taobao_district_id': serializer.validated_data.get('taobao_district_id'),
             'taobao_movie_id': serializer.validated_data.get('taobao_movie_id'),
         }
+        
+        try:
+            cinema_list = CinemaList(city_id, **dic)
+        except ObjectDoesNotExist:
+            return DoesNotExistResponse()
+        except:
+            return UnKnownResponse()
 
-        cinema_list = CinemaList(city_id, **dic)
         task_result = cinema_list.get_cinema_list()
         return Response(task_result)
 
@@ -136,7 +153,13 @@ class PriceListAPI(APIView):
             'taobao_cinema_id': serializer.validated_data.get('taobao_cinema_id'),
         }
         
-        price_list = PriceList(city_id, **dic)
+        try:
+            price_list = PriceList(city_id, **dic)
+        except ObjectDoesNotExist:
+            return DoesNotExistResponse()
+        except:
+            return UnKnownResponse()
+
         task_result = price_list.get_price_list()
         return Response(task_result)
 
