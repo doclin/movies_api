@@ -9,7 +9,7 @@ from movies_tickets.models import City
 
 class TaobaoMovie(object):
     """
-    pass
+    淘宝电影
     """
     def __init__(self):
         self.time_out = 2
@@ -123,11 +123,7 @@ class TaobaoMovie(object):
         return result
 
     def get_city_list(self, url):
-        try:
-            r = requests.get(url, timeout=self.time_out)
-        except:
-            return self.connection_error_message
-
+        r = requests.get(url, timeout=self.time_out)
         info = re.findall(r'"id":.*?pinYin":"\w?', r.text)
         for i in info:
             taobao_city_id = re.search(r'(?<="cityCode":)\d+', i).group()

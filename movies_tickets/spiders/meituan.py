@@ -12,11 +12,11 @@ from movies_tickets.models import City
 
 class MeituanMovie(object):
     """
-    pass
+    美团电影
     """
     def __init__(self):
         self.time_out = 3
-
+    #美团电影列表
     def get_movie_list(self,url):
         r = requests.get(url, timeout=self.time_out)
         soup = BeautifulSoup(r.text)
@@ -39,7 +39,7 @@ class MeituanMovie(object):
                 'taobao_movie_id': '',
             })
         return result
-
+    #美团行政区列表
     def get_district_list(self,url):
         r = requests.get(url, timeout=self.time_out)
         soup = BeautifulSoup(r.text)
@@ -51,10 +51,9 @@ class MeituanMovie(object):
             distric_name = i.get_text()
             meituan_district_href = i['href']
             meituan_district_id = re.search(r'[a-z]+(?=/all)', meituan_district_href).group()
-
+            #去除‘全部’，‘地铁附近’两类
             if meituan_district_id == 'all' or meituan_district_id == 'subway':
                 continue
-
             result.append({
                 'district_name': distric_name,
                 'meituan_district_id': meituan_district_id,
@@ -62,7 +61,7 @@ class MeituanMovie(object):
                 'taobao_district_id': '',
             })
         return result
-
+    #美团电影院列表
     def get_cinema_list(self,url,city):
         r = requests.get(url, timeout=self.time_out)
         soup = BeautifulSoup(r.text)
@@ -76,7 +75,7 @@ class MeituanMovie(object):
             a = h4.find('a')
             meituan_cinema_href = a['href']
             meituan_cinema_id = re.search(r'(?<=/shop/)\d+', meituan_cinema_href).group()
-
+            #统一各网站电影名称
             cinema_name = a.get_text()
             cinema_name = cinema_name.replace('国际', '')
             cinema_name = cinema_name.replace(city, '')
@@ -93,11 +92,10 @@ class MeituanMovie(object):
                 'taobao_cinema_id': '',
             })
         return result
-
-
-
+    #美团价格列表
     def get_price_list(self,url):
         r = requests.get(url,timeout=self.time_out)
+        #不同数字像素和列表
         sum_list = [6647, 3631, 6680, 6137, 5955, 6603, 7381, 4637, 7431, 7304, 575]
         soup = BeautifulSoup(r.text)
         table = soup.find('table',class_='time-table time-table--current')
@@ -118,14 +116,14 @@ class MeituanMovie(object):
             except:
                 i_tag = div[0].find_all('i')
             meituan_now_price = ''
-
+            #因一次请求中图像可能为同一张，所以以此简化流程
             fixed_add = i_tag[0]['style']
             fixed_add = re.search(r'//s0\.mei.*(?=\);)', fixed_add).group()
             fixed_url = 'http:' + fixed_add
             img_request = requests.get(fixed_url, timeout=self.time_out)
             img = Image.open(StringIO(img_request.content))
             
-
+            #识别图像
             for j in i_tag:
                 style = j['style']
                 img_add = re.search(r'//s0\.mei.*(?=\);)', style).group()
@@ -144,7 +142,7 @@ class MeituanMovie(object):
                 else:
                     img_result = img.crop(box)
                     result_sta = ImageStat.Stat(img_result)
-
+                #与列表比较
                 img_sum = int((result_sta.sum)[3])
                 try:
                     num = sum_list.index(img_sum)
@@ -162,14 +160,9 @@ class MeituanMovie(object):
                 'taobao_now_price': '',
             })
         return result
-
-
+    #美团城市列表
     def get_city_list(self, url):
-        try:
-            r = requests.get(url)
-        except:
-            return self.connection_error_message
-
+        r = requests.get(url)
         soup = BeautifulSoup(r.text)
         ol = soup.find_all('ol', class_='hasallcity')
         li = ol[0].find_all('li')

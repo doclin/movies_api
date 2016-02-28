@@ -9,7 +9,7 @@ from movies_tickets.models import City
 
 class NuomiMovie(object):
     """
-    pass
+    糯米电影
     """
     def __init__(self):
         self.time_out = 2
@@ -131,11 +131,7 @@ class NuomiMovie(object):
         return result
 
     def get_city_list(self, url):
-        try:
-            r = requests.get(url, timeout=self.time_out)
-        except:
-            return self.connection_error_message   
-                 
+        r = requests.get(url, timeout=self.time_out)       
         r.encoding = 'utf-8'
         soup = BeautifulSoup(r.text)
         li = soup.find_all('li', class_='city-list clearfix')

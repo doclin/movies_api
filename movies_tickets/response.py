@@ -17,10 +17,16 @@ class APIErrorResponse(Response):
 
 
 class DoesNotExistResponse(APIErrorResponse):
-	def __init__(self):
-		super(DoesNotExistResponse, self).__init__(message=DOESNOTEXIST_MESSAGE)
+    """
+    API 数据库查找错误回复类
+    """
+    def __init__(self):
+        super(DoesNotExistResponse, self).__init__(message=DOESNOTEXIST_MESSAGE)
 
 
 class UnKnownResponse(APIErrorResponse):
-	def __init__(self):
-		super(UnKnownResponse, self).__init__(message=UNKNOWN_MESSAGE)
+    """
+    API 未知错误回复类
+    """
+    def __init__(self):
+        super(UnKnownResponse, self).__init__(message=UNKNOWN_MESSAGE)

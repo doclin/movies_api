@@ -24,11 +24,10 @@ class CityAPI(APIView):
         serializer.is_valid(raise_exception=True)
         update = serializer.validated_data.get('update')
         result = []
-
+        #检查是否更新城市数据库
         if update:
             city_list = CityList()
             result = city_list.update()
-        
         cities = City.objects.all()
         for i in cities:
             result.append({
@@ -52,7 +51,6 @@ class MovieListAPI(APIView):
         """
         serializer = self.serializer_class(data=request.query_params)
         serializer.is_valid(raise_exception=True)
-
         city_id = serializer.validated_data.get('city_id')
         try:
             movie_list = MovieList(city_id)
@@ -60,7 +58,6 @@ class MovieListAPI(APIView):
             return DoesNotExistResponse()
         except:
             return UnKnownResponse()
-
         task_result = movie_list.get_movie_list()
         return Response(task_result)
 
@@ -77,14 +74,12 @@ class DistrictListAPI(APIView):
         """
         serializer = self.serializer_class(data=request.query_params)
         serializer.is_valid(raise_exception=True)
-
         city_id = serializer.validated_data.get('city_id')
         dic = {
             'meituan_movie_id': serializer.validated_data.get('meituan_movie_id'),
             'nuomi_movie_id': serializer.validated_data.get('nuomi_movie_id'),
             'taobao_movie_id': serializer.validated_data.get('taobao_movie_id'),
         }
-        
         try:
             district_list = DistrictList(city_id, **dic)
         except ObjectDoesNotExist:
@@ -108,7 +103,6 @@ class CinemaListAPI(APIView):
         """
         serializer = self.serializer_class(data=request.query_params)
         serializer.is_valid(raise_exception=True)
-
         city_id = serializer.validated_data.get('city_id')
         dic = {
             'meituan_district_id': serializer.validated_data.get('meituan_district_id'),
@@ -142,7 +136,6 @@ class PriceListAPI(APIView):
         """
         serializer = self.serializer_class(data=request.query_params)
         serializer.is_valid(raise_exception=True)
-
         city_id = serializer.validated_data.get('city_id')
         dic = {
             'meituan_movie_id': serializer.validated_data.get('meituan_movie_id'),
@@ -152,38 +145,11 @@ class PriceListAPI(APIView):
             'taobao_movie_id': serializer.validated_data.get('taobao_movie_id'),
             'taobao_cinema_id': serializer.validated_data.get('taobao_cinema_id'),
         }
-        
         try:
             price_list = PriceList(city_id, **dic)
         except ObjectDoesNotExist:
             return DoesNotExistResponse()
         except:
             return UnKnownResponse()
-
         task_result = price_list.get_price_list()
         return Response(task_result)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-
-
-
-
-
-
-
