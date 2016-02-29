@@ -7,10 +7,6 @@ PIL
 
 
 
-#<space, zhushi>
-#<meituan shoujitehu>
-#<join>
-
 #<token>
 #<like meituan currentpage jiancha>
 
