@@ -140,6 +140,22 @@ class TaobaoMovie(object):
                     taobao_city_id=taobao_city_id
                 )
 
+    def get_city_list_without_saving(self, url):
+        result = []
+        r = requests.get(url, timeout=self.time_out)
+        info = re.findall(r'"id":.*?pinYin":"\w?', r.text)
+        for i in info:
+            taobao_city_id = re.search(r'(?<="cityCode":)\d+', i).group()
+            name = re.search(r'(?<="regionName":").*?(?=")', i).group()
+            first_char = i[-1]
+
+            result.append({
+                'city_name': name,
+                'first_char': first_char,
+                'taobao_city_id': taobao_city_id,
+            })
+        return result
+
 
 
         

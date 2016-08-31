@@ -12,7 +12,6 @@ from movies_tickets.spiders.meituan import MeituanMovie
 from movies_tickets.spiders.nuomi import NuomiMovie
 from movies_tickets.spiders.taobao import TaobaoMovie
 
-
 reload(sys)
 sys.setdefaultencoding('utf8')
 
@@ -39,7 +38,7 @@ class MovieList(object):
             meituan_movie = MeituanMovie()
             try:
                 meituan_result = meituan_movie.get_movie_list(self.meituan_url)
-                for meituan_movie in meituan_result:
+                for meituan_movie in meituan_result: ####
                     if meituan_movie['movie_name'] not in self.name_list:
                         self.name_list.append(meituan_movie['movie_name'])
                         self.result.append(meituan_movie)

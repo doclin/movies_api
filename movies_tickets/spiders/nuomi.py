@@ -153,6 +153,28 @@ class NuomiMovie(object):
                         first_char=first_char,
                         nuomi_city_id=nuomi_city_id,    
                     )
+
+    def get_city_list_without_saving(self, url):
+        result = []
+        r = requests.get(url, timeout=self.time_out)
+        r.encoding = 'utf-8'
+        soup = BeautifulSoup(r.text)
+        li = soup.find_all('li', class_='city-list clearfix')
+        for i in li:
+            a = i.find_all('a')
+            for j in a:
+                name_text = j.get_text()
+                name = re.search(r'\S+', name_text).group()
+                href = j['href']
+                nuomi_city_id = re.search(r'(?<=http://)\w+', href).group()
+                first_char = i.find('span', class_='letter fl').get_text()
+
+                result.append({
+                    'city_name': name,
+                    'first_char': first_char,
+                    'nuomi_city_id': nuomi_city_id,
+                })
+        return result
             
 
 
