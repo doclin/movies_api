@@ -7,7 +7,7 @@ import re
 from PIL import Image,ImageStat
 from StringIO import StringIO
 
-from movies_tickets.models import City
+
 
 class MeituanMovie(object):
     """
@@ -18,7 +18,7 @@ class MeituanMovie(object):
     #美团电影列表
     def get_movie_list(self,url):
         r = requests.get(url, timeout=self.time_out)
-        soup = BeautifulSoup(r.text)
+        soup = BeautifulSoup(r.text, "html.parser")
         meituan_div = soup.find_all('div', class_='movie-cell')
         result = []
 
@@ -41,7 +41,7 @@ class MeituanMovie(object):
     #美团行政区列表
     def get_district_list(self,url):
         r = requests.get(url, timeout=self.time_out)
-        soup = BeautifulSoup(r.text)
+        soup = BeautifulSoup(r.text, "html.parser")
         ul = soup.find_all('ul', class_='inline-block-list')
         a = ul[1].find_all('a')
         result = []
@@ -61,9 +61,9 @@ class MeituanMovie(object):
             })
         return result
     #美团电影院列表
-    def get_cinema_list(self,url,city):
+    def get_cinema_list(self,url,city=u'武汉'):
         r = requests.get(url, timeout=self.time_out)
-        soup = BeautifulSoup(r.text)
+        soup = BeautifulSoup(r.text, "html.parser")
         div = soup.find_all('div', class_='J-cinema-item cinema-item cf')
         junk_left = u'\uff08'
         junk_right = u'\uff09'
@@ -76,7 +76,7 @@ class MeituanMovie(object):
             meituan_cinema_id = re.search(r'(?<=/shop/)\d+', meituan_cinema_href).group()
             #统一各网站电影名称
             cinema_name = a.get_text()
-            cinema_name = cinema_name.replace('国际', '')
+            cinema_name = cinema_name.replace(u'国际', '')
             cinema_name = cinema_name.replace(city, '')
             cinema_name = cinema_name.replace(junk_left, '')
             cinema_name = cinema_name.replace(junk_right, '')
@@ -96,7 +96,7 @@ class MeituanMovie(object):
         r = requests.get(url,timeout=self.time_out)
         #不同数字像素和列表
         sum_list = [6647, 3631, 6680, 6137, 5955, 6603, 7381, 4637, 7431, 7304, 575]
-        soup = BeautifulSoup(r.text)
+        soup = BeautifulSoup(r.text, "html.parser")
         table = soup.find('table',class_='time-table time-table--current')
         tr = table.find_all('tr')
         result = []
@@ -161,8 +161,10 @@ class MeituanMovie(object):
         return result
     #美团城市列表
     def get_city_list(self, url):
+        from movies_tickets.models import City
+
         r = requests.get(url)
-        soup = BeautifulSoup(r.text)
+        soup = BeautifulSoup(r.text, "html.parser")
         ol = soup.find_all('ol', class_='hasallcity')
         li = ol[0].find_all('li')
         for i in li:
@@ -187,7 +189,7 @@ class MeituanMovie(object):
     def get_city_list_without_saving(self, url):
         result = []
         r = requests.get(url)
-        soup = BeautifulSoup(r.text)
+        soup = BeautifulSoup(r.text, "html.parser")
         ol = soup.find_all('ol', class_='hasallcity')
         li = ol[0].find_all('li')
         for i in li:
@@ -229,7 +231,7 @@ if __name__ == '__main__':
     for i in meituan_movie_list:
         print i['movie_name']
     meituan_movie_id = meituan_movie_list[0]['meituan_movie_id']
-    print '------------------------------------------------------------------------------------'
+    print '-----------------------------------------------------------------------------------'
     #测试获取行政区信息
     print 'show meituan district list'
     meituan_district_url = ('http://%s.meituan.com/dianying/%s?mtt=1.movie'
@@ -238,21 +240,22 @@ if __name__ == '__main__':
     for i in meituan_district_list:
         print i['district_name']
     meituan_district_id = meituan_district_list[0]['meituan_district_id']
-    print '-------------------------------------------------------------------------------------'
+    print '-----------------------------------------------------------------------------------'
     #测试获取影院信息
     print 'show meituan cinema list'
     meituan_cinema_url = ('http://%s.meituan.com/dianying/%s//%s/all?mtt=1.movie'
                             % (meituan_city_id, meituan_movie_id, meituan_district_id))
-    meituan_cinema_list = meituan_movie.get_cinema_list(meituan_cinema_url)
+    meituan_cinema_list = meituan_movie.get_cinema_list(meituan_cinema_url,)
     for i in meituan_cinema_list:
         print i['cinema_name']
-    meituan_cinema_id = meituan_cinema_list['meituan_cinema_id']
-    print '--------------------------------------------------------------------------------------'
+    meituan_cinema_id = meituan_cinema_list[0]['meituan_cinema_id']
+    print '-----------------------------------------------------------------------------------'
     #测试获取票价信息
     print 'show meituan price list'
     meituan_price_url = ('http://%s.meituan.com/shop/%s?movieid=%s'
                             % (meituan_city_id, meituan_cinema_id, meituan_movie_id))
     meituan_price_list = meituan_movie.get_price_list(meituan_price_url)
+    print meituan_price_url
     for i in meituan_price_list:
         print i['start_time']
 
