@@ -1,12 +1,8 @@
 django==1.8.6
 djangorestframework==3.3.2
 requests==2.9.1
-beautifulsoup4
-mysql-python
-Pillow
-
-
-
-#<token>
-#<like meituan currentpage jiancha>
-
+beautifulsoup4==4.5.1
+mysql-python==1.2.5
+Pillow==3.3.0
+celery==3.1.23
+redis==2.10.5

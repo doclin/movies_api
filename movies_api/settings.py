@@ -87,6 +87,16 @@ DATABASES = {
     }
 }
 
+# CELERY STUFF
+BROKER_URL = 'redis://localhost:6379'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+#CELERY_ACCEPT_CONTENT = ['application/json']
+#CELERY_TASK_SERIALIZER = 'json'
+#CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Shanghai'
+CELERYD_TASK_TIME_LIMIT = 10
+
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
