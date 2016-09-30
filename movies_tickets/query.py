@@ -35,7 +35,7 @@ class MovieList(object):
             meituan_movie = MeituanMovie()
             try:
                 meituan_result = meituan_movie.get_movie_list(self.meituan_url)
-                for meituan_movie in meituan_result: ####
+                for meituan_movie in meituan_result: #### DANGEROURS
                     if meituan_movie['movie_name'] not in self.name_list:
                         self.name_list.append(meituan_movie['movie_name'])
                         self.result.append(meituan_movie)
