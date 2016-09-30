@@ -1,11 +1,8 @@
 #coding=utf8
 
-import sys, os
+import sys
 
-from bs4 import BeautifulSoup
-import requests
 from requests import RequestException
-import re
 
 from movies_tickets.models import City
 from movies_tickets.spiders.meituan import MeituanMovie

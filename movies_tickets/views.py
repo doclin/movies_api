@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from movies_tickets.models import City
-from movies_tickets.tasks import MovieList, DistrictList, CinemaList, PriceList, CityList
+from movies_tickets.query import MovieList, DistrictList, CinemaList, PriceList, CityList
 from movies_tickets.serializers import CityListSerializer, MovieListSerializer, DistrictListSerializer, CinemaListSerializer, PriceListSerializer
 from movies_tickets.response import DoesNotExistResponse, UnKnownResponse
 
