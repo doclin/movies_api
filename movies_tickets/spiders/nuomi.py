@@ -7,7 +7,7 @@ import re
 NUOMI_TIME_OUT = 15
 
 #糯米电影列表
-def get_movie_list(url):
+def nuomi_get_movie_list(url):
     r = requests.get(url,timeout=NUOMI_TIME_OUT)
     r.encoding = 'utf-8'
     soup = BeautifulSoup(r.text, "html.parser")
@@ -33,7 +33,7 @@ def get_movie_list(url):
     return result
 
 #糯米行政区列表
-def get_district_list(url):
+def nuomi_get_district_list(url):
     r = requests.get(url,timeout=NUOMI_TIME_OUT)
     r.encoding = 'utf-8'
     soup = BeautifulSoup(r.text, "html.parser")
@@ -55,7 +55,7 @@ def get_district_list(url):
     return result
 
 #糯米电影院列表
-def get_cinema_list(url, city=u'武汉'):
+def nuomi_get_cinema_list(url, city=u'武汉'):
     r = requests.get(url,timeout=NUOMI_TIME_OUT)
     r.encoding = 'utf-8'
     soup = BeautifulSoup(r.text, "html.parser")
@@ -85,7 +85,7 @@ def get_cinema_list(url, city=u'武汉'):
     return result
 
 #糯米价格列表
-def get_price_list(url):
+def nuomi_get_price_list(url):
     r = requests.get(url, timeout=NUOMI_TIME_OUT)
     r.encoding = 'utf-8'
     soup = BeautifulSoup(r.text, "html.parser")
@@ -111,7 +111,7 @@ def get_price_list(url):
     return result
 
 #糯米城市列表
-def get_city_list(url):
+def nuomi_get_city_list(url):
     from movies_tickets.models import City
     r = requests.get(url, timeout=NUOMI_TIME_OUT)
     r.encoding = 'utf-8'
@@ -136,7 +136,7 @@ def get_city_list(url):
                 )
 
 #糯米城市列表-不存入数据库，返回作测试用
-def get_city_list_without_saving(url):
+def nuomi_get_city_list_without_saving(url):
     result = []
     r = requests.get(url, timeout=NUOMI_TIME_OUT)
     r.encoding = 'utf-8'
@@ -166,7 +166,7 @@ if __name__ == '__main__':
     #测试获取城市信息
     print "show nuomi city list:"
     nuomi_city_url = 'http://www.nuomi.com/pcindex/main/changecity'
-    nuomi_city_list = get_city_list_without_saving(nuomi_city_url)
+    nuomi_city_list = nuomi_get_city_list_without_saving(nuomi_city_url)
     for i in nuomi_city_list:
         print i['city_name']
     nuomi_city_id = nuomi_city_list[10]['nuomi_city_id']
@@ -174,7 +174,7 @@ if __name__ == '__main__':
     #测试获取电影信息
     print 'show nuomi movie list'
     nuomi_movie_url = 'http://%s.nuomi.com/pcindex/main/filmlist?type=1' % nuomi_city_id
-    nuomi_movie_list = get_movie_list(nuomi_movie_url)
+    nuomi_movie_list = nuomi_get_movie_list(nuomi_movie_url)
     for i in nuomi_movie_list:
         print i['movie_name']
     nuomi_movie_id = nuomi_movie_list[0]['nuomi_movie_id']
@@ -183,7 +183,7 @@ if __name__ == '__main__':
     print 'show nuomi district list'
     nuomi_district_url = ('http://%s.nuomi.com/film/%s'
                           % (nuomi_city_id, nuomi_movie_id))
-    nuomi_district_list = get_district_list(nuomi_district_url)
+    nuomi_district_list = nuomi_get_district_list(nuomi_district_url)
     for i in nuomi_district_list:
         print i['district_name']
     nuomi_district_id = nuomi_district_list[0]['nuomi_district_id']
@@ -192,7 +192,7 @@ if __name__ == '__main__':
     print 'show nuomi cinema list'
     nuomi_cinema_url = ('http://%s.nuomi.com/film/%s/%s/sub0d0/cb0-d10000-s0-o-b1-f0-p1#cinema-nav'
                           % (nuomi_city_id, nuomi_movie_id, nuomi_district_id))
-    nuomi_cinema_list = get_cinema_list(nuomi_cinema_url)
+    nuomi_cinema_list = nuomi_get_cinema_list(nuomi_cinema_url)
     for i in nuomi_cinema_list:
         print i['cinema_name']
     nuomi_cinema_id = nuomi_cinema_list[0]['nuomi_cinema_id']
@@ -201,7 +201,7 @@ if __name__ == '__main__':
     print 'show nuomi price list'
     nuomi_price_url = ('http://%s.nuomi.com/pcindex/main/timetable?cinemaid=%s&mid=%s'
                           % (nuomi_city_id, nuomi_cinema_id, nuomi_movie_id))
-    nuomi_price_list = get_price_list(nuomi_price_url)
+    nuomi_price_list = nuomi_get_price_list(nuomi_price_url)
     print nuomi_price_url
     for i in nuomi_price_list:
         print i['start_time']

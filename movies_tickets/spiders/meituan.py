@@ -11,7 +11,7 @@ MEITUAN_TIME_OUT = 5
 
 
 #美团电影列表
-def get_movie_list(url):
+def meituan_get_movie_list(url):
     r = requests.get(url, timeout=MEITUAN_TIME_OUT)
     soup = BeautifulSoup(r.text, "html.parser")
     meituan_div = soup.find_all('div', class_='movie-cell')
@@ -33,7 +33,7 @@ def get_movie_list(url):
     return result
 
 #美团行政区列表
-def get_district_list(url):
+def meituan_get_district_list(url):
     r = requests.get(url, timeout=MEITUAN_TIME_OUT)
     soup = BeautifulSoup(r.text, "html.parser")
     ul = soup.find_all('ul', class_='inline-block-list')
@@ -55,7 +55,7 @@ def get_district_list(url):
     return result
 
 #美团电影院列表
-def get_cinema_list(url,city=u'武汉'):
+def meituan_get_cinema_list(url,city=u'武汉'):
     r = requests.get(url, timeout=MEITUAN_TIME_OUT)
     soup = BeautifulSoup(r.text, "html.parser")
     div = soup.find_all('div', class_='J-cinema-item cinema-item cf')
@@ -85,7 +85,7 @@ def get_cinema_list(url,city=u'武汉'):
     return result
 
 #美团价格列表
-def get_price_list(url):
+def meituan_get_price_list(url):
     r = requests.get(url,timeout=MEITUAN_TIME_OUT)
     #不同数字像素和列表
     sum_list = [6647, 3631, 6680, 6137, 5955, 6603, 7381, 4637, 7431, 7304, 575]
@@ -150,7 +150,7 @@ def get_price_list(url):
     return result
 
 #美团城市列表
-def get_city_list(url):
+def meituan_get_city_list(url):
     from movies_tickets.models import City
     r = requests.get(url)
     soup = BeautifulSoup(r.text, "html.parser")
@@ -174,7 +174,7 @@ def get_city_list(url):
                 )
 
 #美团城市列表-不存入数据库，返回作测试用
-def get_city_list_without_saving(url):
+def meituan_get_city_list_without_saving(url):
     result = []
     r = requests.get(url)
     soup = BeautifulSoup(r.text, "html.parser")
@@ -203,7 +203,7 @@ if __name__ == '__main__':
     #测试获取城市信息
     print "show meituan city list:"
     meituan_city_url = 'http://www.meituan.com/index/changecity/initiative'
-    meituan_city_list = get_city_list_without_saving(meituan_city_url)
+    meituan_city_list = meituan_get_city_list_without_saving(meituan_city_url)
     for i in meituan_city_list:
         print i['city_name']
     meituan_city_id = meituan_city_list[100]['meituan_city_id']
@@ -211,7 +211,7 @@ if __name__ == '__main__':
     #测试获取电影信息
     print 'show meituan movie list'
     meituan_movie_url = 'http://%s.meituan.com/dianying/zuixindianying' % meituan_city_id
-    meituan_movie_list = get_movie_list(meituan_movie_url)
+    meituan_movie_list = meituan_get_movie_list(meituan_movie_url)
     for i in meituan_movie_list:
         print i['movie_name']
     meituan_movie_id = meituan_movie_list[0]['meituan_movie_id']
@@ -220,7 +220,7 @@ if __name__ == '__main__':
     print 'show meituan district list'
     meituan_district_url = ('http://%s.meituan.com/dianying/%s?mtt=1.movie'
                             % (meituan_city_id, meituan_movie_id))
-    meituan_district_list = get_district_list(meituan_district_url)
+    meituan_district_list = meituan_get_district_list(meituan_district_url)
     for i in meituan_district_list:
         print i['district_name']
     meituan_district_id = meituan_district_list[0]['meituan_district_id']
@@ -229,7 +229,7 @@ if __name__ == '__main__':
     print 'show meituan cinema list'
     meituan_cinema_url = ('http://%s.meituan.com/dianying/%s//%s/all?mtt=1.movie'
                             % (meituan_city_id, meituan_movie_id, meituan_district_id))
-    meituan_cinema_list = get_cinema_list(meituan_cinema_url,)
+    meituan_cinema_list = meituan_get_cinema_list(meituan_cinema_url,)
     for i in meituan_cinema_list:
         print i['cinema_name']
     meituan_cinema_id = meituan_cinema_list[0]['meituan_cinema_id']
@@ -238,7 +238,7 @@ if __name__ == '__main__':
     print 'show meituan price list'
     meituan_price_url = ('http://%s.meituan.com/shop/%s?movieid=%s'
                             % (meituan_city_id, meituan_cinema_id, meituan_movie_id))
-    meituan_price_list = get_price_list(meituan_price_url)
+    meituan_price_list = meituan_get_price_list(meituan_price_url)
     print meituan_price_url
     for i in meituan_price_list:
         print i['start_time']

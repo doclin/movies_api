@@ -8,7 +8,7 @@ TAOBAO_TIME_OUT = 15
 
 
 #淘宝电影列表
-def get_movie_list(url):
+def taobao_get_movie_list(url):
     r = requests.get(url, timeout=TAOBAO_TIME_OUT)
     soup = BeautifulSoup(r.text, "html.parser")
     junk = soup.find_all('div', class_='tab-movie-list')
@@ -33,7 +33,7 @@ def get_movie_list(url):
     return result
 
 #淘宝行政区列表
-def get_district_list(url):
+def taobao_get_district_list(url):
     r = requests.get(url, timeout=TAOBAO_TIME_OUT)
     soup = BeautifulSoup(r.text, "html.parser")
     ul = soup.find_all('ul', class_='filter-select')
@@ -53,7 +53,7 @@ def get_district_list(url):
     return result
 
 #淘宝电影院列表
-def get_cinema_list(url, city=u'武汉'):
+def taobao_get_cinema_list(url, city=u'武汉'):
     r = requests.get(url, timeout=TAOBAO_TIME_OUT)
     soup = BeautifulSoup(r.text, "html.parser")
     div = soup.find_all('div', class_='select-tags')
@@ -81,7 +81,7 @@ def get_cinema_list(url, city=u'武汉'):
     return result
 
 #淘宝价格列表
-def get_price_list(url):
+def taobao_get_price_list(url):
     r = requests.get(url, timeout=TAOBAO_TIME_OUT)
     soup = BeautifulSoup(r.text, "html.parser")
     thead = soup.find_all('thead')
@@ -107,7 +107,7 @@ def get_price_list(url):
     return result
 
 #淘宝城市列表
-def get_city_list(url):
+def taobao_get_city_list(url):
     from movies_tickets.models import City
     r = requests.get(url, timeout=TAOBAO_TIME_OUT)
     info = re.findall(r'"id":.*?pinYin":"\w?', r.text)
@@ -126,7 +126,7 @@ def get_city_list(url):
             )
 
 #淘宝城市列表-不存入数据库，返回作测试用
-def get_city_list_without_saving(url):
+def taobao_get_city_list_without_saving(url):
     result = []
     r = requests.get(url, timeout=TAOBAO_TIME_OUT)
     info = re.findall(r'"id":.*?pinYin":"\w?', r.text)
@@ -152,7 +152,7 @@ if __name__ == '__main__':
     #测试获取城市信息
     print "show taobao city list:"
     taobao_city_url = 'http://dianying.taobao.com/cityAction.json?activityId&action=cityAction&event_submit_doGetAllRegion=true'
-    taobao_city_list = get_city_list_without_saving(taobao_city_url)
+    taobao_city_list = taobao_get_city_list_without_saving(taobao_city_url)
     for i in taobao_city_list:
         print i['city_name']
     taobao_city_id = taobao_city_list[16]['taobao_city_id']
@@ -160,7 +160,7 @@ if __name__ == '__main__':
     #测试获取电影信息
     print 'show taobao movie list'
     taobao_movie_url = 'https://dianying.taobao.com/showList.htm?city=%s' % taobao_city_id
-    taobao_movie_list = get_movie_list(taobao_movie_url)
+    taobao_movie_list = taobao_get_movie_list(taobao_movie_url)
     for i in taobao_movie_list:
         print i['movie_name']
     taobao_movie_id = taobao_movie_list[0]['taobao_movie_id']
@@ -169,7 +169,7 @@ if __name__ == '__main__':
     print 'show taobao district list'
     taobao_district_url = ('https://dianying.taobao.com/showDetailSchedule.htm?showId=%s&city=%s'
                            % (taobao_movie_id, taobao_city_id))
-    taobao_district_list = get_district_list(taobao_district_url)
+    taobao_district_list = taobao_get_district_list(taobao_district_url)
     for i in taobao_district_list:
         print i['district_name']
     taobao_district_id = taobao_district_list[0]['taobao_district_id']
@@ -178,7 +178,7 @@ if __name__ == '__main__':
     print 'show taobao cinema list'
     taobao_cinema_url = ('https://dianying.taobao.com/showDetailSchedule.htm?showId=%s&regionName=%s&city=%s'
                            % (taobao_movie_id, unicode(taobao_district_id), taobao_city_id))
-    taobao_cinema_list = get_cinema_list(taobao_cinema_url,)
+    taobao_cinema_list = taobao_get_cinema_list(taobao_cinema_url,)
     for i in taobao_cinema_list:
         print i['cinema_name']
     taobao_cinema_id = taobao_cinema_list[0]['taobao_cinema_id']
@@ -188,7 +188,7 @@ if __name__ == '__main__':
     taobao_price_url = ('https://dianying.taobao.com/showDetailSchedule.htm?showId=%s&city=%s&cinemaId=%s'
                            % (taobao_movie_id, taobao_city_id ,taobao_cinema_id))
     print taobao_price_url
-    taobao_price_list = get_price_list(taobao_price_url)
+    taobao_price_list = taobao_get_price_list(taobao_price_url)
     for i in taobao_price_list:
         print i['start_time']
 
