@@ -169,7 +169,7 @@ if __name__ == '__main__':
     nuomi_city_list = nuomi_get_city_list_without_saving(nuomi_city_url)
     for i in nuomi_city_list:
         print i['city_name']
-    nuomi_city_id = nuomi_city_list[10]['nuomi_city_id']
+    nuomi_city_id = nuomi_city_list[15]['nuomi_city_id']
     print '-----------------------------------------------------------------------------------'
     #测试获取电影信息
     print 'show nuomi movie list'
@@ -183,6 +183,7 @@ if __name__ == '__main__':
     print 'show nuomi district list'
     nuomi_district_url = ('http://%s.nuomi.com/film/%s'
                           % (nuomi_city_id, nuomi_movie_id))
+    print nuomi_district_url
     nuomi_district_list = nuomi_get_district_list(nuomi_district_url)
     for i in nuomi_district_list:
         print i['district_name']

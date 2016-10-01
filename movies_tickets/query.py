@@ -46,6 +46,8 @@ class MovieList(object):
                         self.result[index]['meituan_movie_id'] = meituan_movie['meituan_movie_id']
             except RequestException: 
                 self.result[0].append('meituan connection broken')
+            except AttributeError:
+                self.result[0].append('meituan queryset not exists')
             except:
                 self.result[0].append('meituan unknown error')                   
 
@@ -61,6 +63,8 @@ class MovieList(object):
                         self.result[index]['nuomi_movie_id'] = nuomi_movie['nuomi_movie_id']
             except RequestException:
                 self.result[0].append('nuomi connection broken')
+            except AttributeError:
+                self.result[0].append('nuomi queryset not exists')
             except:
                 self.result[0].append('nuomi unknown error')
 
@@ -76,6 +80,8 @@ class MovieList(object):
                         self.result[index]['taobao_movie_id'] = taobao_movie['taobao_movie_id']
             except RequestException:
                 self.result[0].append('taobao connection broken')
+            except AttributeError:
+                self.result[0].append('taobao queryset not exists')
             except:
                 self.result[0].append('taobao unknown error')
 
@@ -119,6 +125,8 @@ class DistrictList(object):
                         self.result[index]['meituan_district_id'] = meituan_district['meituan_district_id']
             except RequestException:
                 self.result[0].append('meituan connection broken')
+            except AttributeError:
+                self.result[0].append('meituan queryset not exists')
             except:
                 self.result[0].append('meituan unknown error')
                     
@@ -134,8 +142,10 @@ class DistrictList(object):
                         self.result[index]['nuomi_district_id'] = nuomi_district['nuomi_district_id']
             except RequestException:
                 self.result[0].append('nuomi connection broken')
+            except AttributeError:
+                self.result[0].append('nuomi queryset not exists')
             except:
-                self.result[0].append('taobao unknown error')
+                self.result[0].append('nuomi unknown error')
 
         if self.taobao_city_id and self.taobao_movie_id:
             try:
@@ -149,6 +159,8 @@ class DistrictList(object):
                         self.result[index]['taobao_district_id'] = taobao_district['taobao_district_id']
             except RequestException:
                 self.result[0].append('taobao connection broken')
+            except AttributeError:
+                self.result[0].append('taobao queryset not exists')
             except:
                 self.result[0].append('taobao unknown error')
 
@@ -196,6 +208,8 @@ class CinemaList(object):
                         self.result[index]['meituan_cinema_id'] = meituan_cinema['meituan_cinema_id']
             except RequestException:
                 self.result[0].append('meituan connection broken')
+            except AttributeError:
+                self.result[0].append('meituan queryset not exists')
             except:
                 self.result[0].append('meituan unknown error')
 
@@ -211,6 +225,8 @@ class CinemaList(object):
                         self.result[index]['nuomi_cinema_id'] = nuomi_cinema['nuomi_cinema_id']
             except RequestException:
                 self.result[0].append('nuomi connection broken')
+            except AttributeError:
+                self.result[0].append('nuomi queryset not exists')
             except:
                 self.result[0].append('nuomi unknown error')
 
@@ -226,6 +242,8 @@ class CinemaList(object):
                         self.result[index]['taobao_cinema_id'] = taobao_cinema['taobao_cinema_id']
             except RequestException:
                 self.result[0].append('taobao connection broken')
+            except AttributeError:
+                self.result[0].append('taobao queryset not exists')
             except:
                 self.result[0].append('taobao unknown error')
 
@@ -272,6 +290,8 @@ class PriceList(object):
                         self.result[index]['meituan_now_price'] = meituan_price['meituan_now_price']
             except RequestException:
                 self.result[0].append('meituan connection broken')
+            except AttributeError:
+                self.result[0].append('meituan queryset not exists')
             except:
                 self.result[0].append('meituan unknown error')
 
@@ -287,6 +307,8 @@ class PriceList(object):
                         self.result[index]['nuomi_now_price'] = nuomi_price['nuomi_now_price']
             except RequestException:
                 self.result[0].append('nuomi connection broken')
+            except AttributeError:
+                self.result[0].append('nuomi queryset not exists')
             except:
                 self.result[0].append('nuomi unknown error')
 
@@ -302,6 +324,8 @@ class PriceList(object):
                         self.result[index]['taobao_now_price'] = taobao_price['taobao_now_price']
             except RequestException:
                 self.result[0].append('taobao connection broken')
+            except AttributeError:
+                self.result[0].append('taobao queryset not exists')
             except:
                 self.result[0].append('taobao unknown error')
 

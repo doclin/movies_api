@@ -141,8 +141,6 @@ def taobao_get_city_list_without_saving(url):
         })
     return result
 
-#TODO: when there is no movies, break? pass?以及其他捕获异常
-
     
 
 if __name__ == '__main__':
