@@ -4,10 +4,13 @@ from bs4 import BeautifulSoup
 import requests
 import re
 
-NUOMI_TIME_OUT = 15
+from movies_api.celery import app
+
+NUOMI_TIME_OUT = 3
 
 #糯米电影列表
-def nuomi_get_movie_list(url):
+@app.task(bind=True)
+def nuomi_get_movie_list(self, url):
     r = requests.get(url,timeout=NUOMI_TIME_OUT)
     r.encoding = 'utf-8'
     soup = BeautifulSoup(r.text, "html.parser")
@@ -33,7 +36,8 @@ def nuomi_get_movie_list(url):
     return result
 
 #糯米行政区列表
-def nuomi_get_district_list(url):
+@app.task(bind=True)
+def nuomi_get_district_list(self, url):
     r = requests.get(url,timeout=NUOMI_TIME_OUT)
     r.encoding = 'utf-8'
     soup = BeautifulSoup(r.text, "html.parser")
@@ -55,7 +59,8 @@ def nuomi_get_district_list(url):
     return result
 
 #糯米电影院列表
-def nuomi_get_cinema_list(url, city=u'武汉'):
+@app.task(bind=True)
+def nuomi_get_cinema_list(self, url, city=u'武汉'):
     r = requests.get(url,timeout=NUOMI_TIME_OUT)
     r.encoding = 'utf-8'
     soup = BeautifulSoup(r.text, "html.parser")
@@ -85,7 +90,8 @@ def nuomi_get_cinema_list(url, city=u'武汉'):
     return result
 
 #糯米价格列表
-def nuomi_get_price_list(url):
+@app.task(bind=True)
+def nuomi_get_price_list(self, url):
     r = requests.get(url, timeout=NUOMI_TIME_OUT)
     r.encoding = 'utf-8'
     soup = BeautifulSoup(r.text, "html.parser")
@@ -111,7 +117,8 @@ def nuomi_get_price_list(url):
     return result
 
 #糯米城市列表
-def nuomi_get_city_list(url):
+@app.task(bind=True)
+def nuomi_get_city_list(self, url):
     from movies_tickets.models import City
     r = requests.get(url, timeout=NUOMI_TIME_OUT)
     r.encoding = 'utf-8'
@@ -136,7 +143,8 @@ def nuomi_get_city_list(url):
                 )
 
 #糯米城市列表-不存入数据库，返回作测试用
-def nuomi_get_city_list_without_saving(url):
+@app.task(bind=True)
+def nuomi_get_city_list_without_saving(self, url):
     result = []
     r = requests.get(url, timeout=NUOMI_TIME_OUT)
     r.encoding = 'utf-8'

@@ -4,11 +4,14 @@ from bs4 import BeautifulSoup
 import requests
 import re
 
-TAOBAO_TIME_OUT = 15
+from movies_api.celery import app
+
+TAOBAO_TIME_OUT = 3
 
 
 #淘宝电影列表
-def taobao_get_movie_list(url):
+@app.task(bind=True)
+def taobao_get_movie_list(self, url):
     r = requests.get(url, timeout=TAOBAO_TIME_OUT)
     soup = BeautifulSoup(r.text, "html.parser")
     junk = soup.find_all('div', class_='tab-movie-list')
@@ -33,7 +36,8 @@ def taobao_get_movie_list(url):
     return result
 
 #淘宝行政区列表
-def taobao_get_district_list(url):
+@app.task(bind=True)
+def taobao_get_district_list(self, url):
     r = requests.get(url, timeout=TAOBAO_TIME_OUT)
     soup = BeautifulSoup(r.text, "html.parser")
     ul = soup.find_all('ul', class_='filter-select')
@@ -53,7 +57,8 @@ def taobao_get_district_list(url):
     return result
 
 #淘宝电影院列表
-def taobao_get_cinema_list(url, city=u'武汉'):
+@app.task(bind=True)
+def taobao_get_cinema_list(self, url, city=u'武汉'):
     r = requests.get(url, timeout=TAOBAO_TIME_OUT)
     soup = BeautifulSoup(r.text, "html.parser")
     div = soup.find_all('div', class_='select-tags')
@@ -81,7 +86,8 @@ def taobao_get_cinema_list(url, city=u'武汉'):
     return result
 
 #淘宝价格列表
-def taobao_get_price_list(url):
+@app.task(bind=True)
+def taobao_get_price_list(self, url):
     r = requests.get(url, timeout=TAOBAO_TIME_OUT)
     soup = BeautifulSoup(r.text, "html.parser")
     thead = soup.find_all('thead')
@@ -107,7 +113,8 @@ def taobao_get_price_list(url):
     return result
 
 #淘宝城市列表
-def taobao_get_city_list(url):
+@app.task(bind=True)
+def taobao_get_city_list(self, url):
     from movies_tickets.models import City
     r = requests.get(url, timeout=TAOBAO_TIME_OUT)
     info = re.findall(r'"id":.*?pinYin":"\w?', r.text)
@@ -126,7 +133,8 @@ def taobao_get_city_list(url):
             )
 
 #淘宝城市列表-不存入数据库，返回作测试用
-def taobao_get_city_list_without_saving(url):
+@app.task(bind=True)
+def taobao_get_city_list_without_saving(self, url):
     result = []
     r = requests.get(url, timeout=TAOBAO_TIME_OUT)
     info = re.findall(r'"id":.*?pinYin":"\w?', r.text)

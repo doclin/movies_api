@@ -7,11 +7,14 @@ import re
 from PIL import Image,ImageStat
 from StringIO import StringIO
 
-MEITUAN_TIME_OUT = 5
+from movies_api.celery import app
+
+MEITUAN_TIME_OUT = 3
 
 
 #美团电影列表
-def meituan_get_movie_list(url):
+@app.task(bind=True)
+def meituan_get_movie_list(self, url):
     r = requests.get(url, timeout=MEITUAN_TIME_OUT)
     soup = BeautifulSoup(r.text, "html.parser")
     meituan_div = soup.find_all('div', class_='movie-cell')
@@ -33,7 +36,8 @@ def meituan_get_movie_list(url):
     return result
 
 #美团行政区列表
-def meituan_get_district_list(url):
+@app.task(bind=True)
+def meituan_get_district_list(self, url):
     r = requests.get(url, timeout=MEITUAN_TIME_OUT)
     soup = BeautifulSoup(r.text, "html.parser")
     ul = soup.find_all('ul', class_='inline-block-list')
@@ -55,7 +59,8 @@ def meituan_get_district_list(url):
     return result
 
 #美团电影院列表
-def meituan_get_cinema_list(url,city=u'武汉'):
+@app.task(bind=True)
+def meituan_get_cinema_list(self, url, city=u'武汉'):
     r = requests.get(url, timeout=MEITUAN_TIME_OUT)
     soup = BeautifulSoup(r.text, "html.parser")
     div = soup.find_all('div', class_='J-cinema-item cinema-item cf')
@@ -85,7 +90,8 @@ def meituan_get_cinema_list(url,city=u'武汉'):
     return result
 
 #美团价格列表
-def meituan_get_price_list(url):
+@app.task(bind=True)
+def meituan_get_price_list(self, url):
     r = requests.get(url,timeout=MEITUAN_TIME_OUT)
     #不同数字像素和列表
     sum_list = [6647, 3631, 6680, 6137, 5955, 6603, 7381, 4637, 7431, 7304, 575]
@@ -150,7 +156,8 @@ def meituan_get_price_list(url):
     return result
 
 #美团城市列表
-def meituan_get_city_list(url):
+@app.task(bind=True)
+def meituan_get_city_list(self, url):
     from movies_tickets.models import City
     r = requests.get(url)
     soup = BeautifulSoup(r.text, "html.parser")
@@ -174,7 +181,8 @@ def meituan_get_city_list(url):
                 )
 
 #美团城市列表-不存入数据库，返回作测试用
-def meituan_get_city_list_without_saving(url):
+@app.task(bind=True)
+def meituan_get_city_list_without_saving(self, url):
     result = []
     r = requests.get(url)
     soup = BeautifulSoup(r.text, "html.parser")
